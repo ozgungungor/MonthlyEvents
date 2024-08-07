@@ -40,7 +40,7 @@ prompting the user for authorization in your app following these steps:
  
 + Build your app with Xcode 15 and link against the iOS 17 SDK. 
 + If your app includes [`NSCalendarsUsageDescription`](https://developer.apple.com/documentation/bundleresources/information_property_list/nscalendarsusagedescription), remove this key.
-+ If your app requests permission using [`requestAccess(to:completion:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/1507547-requestaccess) 
++ If your app requests permission using [`requestAccess(to:completion:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/requestaccess) 
 or `requestAccess(to:)`, remove these instance methods from your source code. 
 
  The `DropInLessons` app writes data to Calendar without performing any other operations on the user's events. Because its workflow doesn't interact 
@@ -78,7 +78,7 @@ func eventEditViewController(_ controller: EKEventEditViewController, didComplet
 }
 ```
 
-Because the calendar edits happen out of process, inspecting the properties of the dismissed `controller`, such as [`event`](https://developer.apple.com/documentation/eventkitui/ekeventeditviewcontroller/1613936-event), to determine what the user 
+Because the calendar edits happen out of process, inspecting the properties of the dismissed `controller`, such as [`event`](https://developer.apple.com/documentation/eventkitui/ekeventeditviewcontroller/event), to determine what the user 
 added to Calendar doesn't return any useful information. The app isn't aware of the changes, which naturally means it can't see them.
 
 
@@ -134,7 +134,7 @@ let calendarChooser = EKCalendarChooser(selectionStyle: .single,
                                         eventStore: storeManager.store)
 ```
 
-The app sets the [`selectedCalendars`](https://developer.apple.com/documentation/eventkitui/ekcalendarchooser/1613926-selectedcalendars)
+The app sets the [`selectedCalendars`](https://developer.apple.com/documentation/eventkitui/ekcalendarchooser/selectedcalendars)
 property of `EKCalendarChooser` to `calendar`, which is empty when the user hasn't selected a calendar. 
 
 ``` swift
@@ -178,7 +178,7 @@ To implement full access in your app, follow these steps:
 + Add the `NSCalendarsFullAccessUsageDescription` key to the `Info.plist` file of the target building your app.
 + To request full access to events, use `requestFullAccessToEvents(completion:)` or `requestFullAccessToEvents()`.
 
-Upon its first launch, the `MonthlyEvents` app registers for [`EKEventStoreChanged`](https://developer.apple.com/documentation/foundation/nsnotification/name/1507525-ekeventstorechanged) notifications
+Upon its first launch, the `MonthlyEvents` app registers for [`EKEventStoreChanged`](https://developer.apple.com/documentation/foundation/nsnotification/name/ekeventstorechanged) notifications
 to listen for any changes to the event store.
 
 ``` swift
@@ -223,7 +223,7 @@ If the user denies the request, the app does nothing. In subsequent launches, th
 access in Settings on their device. 
 
 Because the user authorized the app for full access, the user can additionally select and delete one or more events in `MonthlyEvents`. The app 
-iterates through an array of events that the user chose to delete. It calls and sets the `commit` parameter of the [`remove(_:span:commit:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/1507469-remove) function to `false` to batch the 
+iterates through an array of events that the user chose to delete. It calls and sets the `commit` parameter of the [`remove(_:span:commit:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/remove) function to `false` to batch the 
 deletion of each event in the array.
 ``` swift
 try self.eventStore.remove(event, span: .thisEvent, commit: false)
@@ -236,7 +236,7 @@ try eventStore.commit()
 
 When you assign `true` to `commit` to immediately save or remove the event in your app, the event store automatically rolls back any changes if the 
 commit operation fails. However, if you set `commit` to `false` and your app successfully removes some events and fails removing others, this can 
-result in a later commit failing. Every subsequent commit fails until you roll back the changes. Call [`reset()`](https://developer.apple.com/documentation/eventkit/ekeventstore/1507345-reset) 
+result in a later commit failing. Every subsequent commit fails until you roll back the changes. Call [`reset()`](https://developer.apple.com/documentation/eventkit/ekeventstore/reset) 
 to manually roll back the changes.
 ``` swift
 eventStore.reset()
@@ -248,9 +248,9 @@ If you build your app with Xcode 15, link it against the iOS 17 SDK, and need to
 + Add [`NSCalendarsUsageDescription`](https://developer.apple.com/documentation/bundleresources/information_property_list/nscalendarsusagedescription) 
 to the `Info.plist` file of the target building your app. If your app that’s linked on iOS 10 through iOS 16 doesn’t 
 include `NSCalendarsUsageDescription`, your app crashes.
-+ To request access to events, use [`requestAccess(to:completion:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/1507547-requestaccess) 
++ To request access to events, use [`requestAccess(to:completion:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/requestaccess) 
 or `requestAccess(to: .event)`.
-+ To determine whether your app is authorized to access the user's calendar data, confirm that [`authorizationStatus(for:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/1507239-authorizationstatus) is set to [`.authorized`](https://developer.apple.com/documentation/eventkit/ekauthorizationstatus).
++ To determine whether your app is authorized to access the user's calendar data, confirm that [`authorizationStatus(for:)`](https://developer.apple.com/documentation/eventkit/ekeventstore/authorizationstatus) is set to [`.authorized`](https://developer.apple.com/documentation/eventkit/ekauthorizationstatus).
 
 
 - Note: The new request methods are unavailable on systems earlier than iOS 17, which may cause your app to crash when running on these versions. Check
