@@ -1,0 +1,66 @@
+// SettingsView Keys
+"SETTINGS_TITLE" = "Settings";
+"WEEKLY_HOLIDAYS_SECTION_HEADER" = "WEEKLY HOLIDAYS";
+"CALENDAR_HOLIDAY_KEYWORDS_SECTION_HEADER" = "CALENDAR HOLIDAY KEYWORDS";
+"LANGUAGE_SETTINGS_SECTION_HEADER" = "Language";
+"SELECT_LANGUAGE_PICKER_LABEL" = "Select Language";
+"MONDAY" = "Monday";
+"TUESDAY" = "Tuesday";
+"WEDNESDAY" = "Wednesday";
+"THURSDAY" = "Thursday";
+"FRIDAY" = "Friday";
+"SATURDAY" = "Saturday";
+"SUNDAY" = "Sunday";
+"SAVE" = "Save";
+"CANCEL" = "Cancel";
+"KEYWORDS_PROMPT" = "Enter comma-separated keywords. Days will be considered holidays if events in your calendar contain these words.";
+"TURKISH" = "Turkish";
+"ENGLISH" = "English";
+
+// Common Keys for MainView (also usable by SettingsView and CardFormView)
+"MY_CARDS_TITLE" = "💳 My Cards";
+"CALENDAR_ACCESS_GRANTED" = "Calendar access granted - Calculating including holidays";
+"CALENDAR_ACCESS_DENIED" = "No calendar access - Calculating basic holidays only";
+"SETTINGS_GEAR_ACCESSIBILITY_LABEL" = "Settings";
+"ADD_CARD_ACCESSIBILITY_LABEL" = "Add Card";
+
+// CardRowView Keys
+"PAYMENT_DAY_TODAY" = "💡 Payment Day: Today";
+"NEXT_MONTH_DUE_DATE" = "🔁 Next Month: %@"; // %@ will be replaced with the date
+"DUE_DATE_DISPLAY" = "Due Date: %@"; // %@ will be replaced with the date
+"DUE_DATE_UNAVAILABLE" = "⚠️ Due Date Could Not Be Determined";
+
+// NotificationManager Keys (Notification texts)
+"CREDIT_CARD_REMINDER_TITLE" = "💳 Credit Card Reminder";
+"CREDIT_CARD_REMINDER_BODY" = "The due date for your %@ card is approaching! (**** %@)"; // 1st %@ is card name, 2nd %@ is last four digits
+
+// CardFormView Keys
+"SECTION_CARD_INFO" = "Card Information";
+"TEXTFIELD_CARD_NAME_PLACEHOLDER" = "Card Name (e.g., Bank Name)";
+"TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER" = "Last 4 Digits";
+"SECTION_ACCOUNT_CUTOFF" = "Account Cutoff";
+"PICKER_DAY_OF_MONTH_LABEL" = "Day of Month";
+"DAY_TAG_FORMAT" = "%d"; // For "1", "2" etc. in picker. Add "st", "nd", "rd", "th" if needed, e.g., "%dst"
+"SECTION_CARD_COLOR" = "Card Color";
+"COLORPICKER_SELECT_COLOR_LABEL" = "Select Color";
+"BUTTON_DELETE_CARD" = "Delete Card";
+"NAV_TITLE_ADD_CARD" = "Add New Card";
+"NAV_TITLE_EDIT_CARD" = "Edit Card";
+"ALERT_TITLE_DELETE_CARD" = "Delete Card"; // Can also be used for the alert title
+"ALERT_MESSAGE_DELETE_CARD_CONFIRMATION" = "Are you sure you want to delete this card and its related reminder? This action cannot be undone.";
+
+// MainView Specific Keys
+"EMPTY_STATE_TITLE" = "No Cards Yet";
+"EMPTY_STATE_MESSAGE" = "Tap the '+' button to add your first credit card and start tracking due dates.";
+"EMPTY_STATE_ADD_CARD_BUTTON" = "Add First Card";
+
+"ALERT_PERMISSION_REQUIRED_TITLE" = "Permission Required";
+"ALERT_BUTTON_GO_TO_SETTINGS" = "Go to Settings";
+"ALERT_BUTTON_OK" = "OK";
+
+"PERMISSION_ALERT_BASE_MESSAGE" = "The app requires the following permissions for some features:";
+"PERMISSION_ALERT_NOTIFICATION_DENIED" = "Notification permission denied: You need to allow notifications in Settings for reminders.";
+"PERMISSION_ALERT_NOTIFICATION_NOT_DETERMINED" = "Notification permission: It is recommended to allow notifications to receive reminders.";
+"PERMISSION_ALERT_CALENDAR_DENIED" = "Calendar permission (Full Access) not granted/restricted: To correctly calculate variable holidays like Eid, you need to grant 'Full Access' to your calendar in Settings.";
+"PERMISSION_ALERT_CALENDAR_NOT_AVAILABLE" = "Calendar permission (Full Access) could not be obtained: Calendar access is required to correctly calculate variable holidays like Eid.";
+"PERMISSION_ALERT_MANAGE_IN_SETTINGS" = "You can manage permissions in the Settings app.";
