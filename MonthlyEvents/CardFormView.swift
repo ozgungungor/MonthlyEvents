@@ -4,13 +4,14 @@ struct CardFormView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var dataManager: CardDataManager
     @ObservedObject var holidayService: HolidayService
-    @Environment(\.locale) var currentLocale // Mevcut locale'i al
+    @Environment(\.locale) var currentLocale
 
     @State private var cardName: String
     @State private var lastFourDigits: String
     @State private var selectedDay: Int
     @State private var pickedColor: Color
     @State private var showingDeleteAlert = false
+    @State private var paymentDueDaysOffset: Int
 
     let cardToEdit: CreditCard?
     private var mode: FormMode {
@@ -29,38 +30,42 @@ struct CardFormView: View {
         _cardName = State(initialValue: cardToEdit?.name ?? "")
         _lastFourDigits = State(initialValue: cardToEdit?.lastFourDigits ?? "")
         _selectedDay = State(initialValue: cardToEdit?.dueDate ?? 1)
-        
+
         let initialColorString = cardToEdit?.color ?? "blue"
         _pickedColor = State(initialValue: Self.colorFromString(initialColorString))
+        _paymentDueDaysOffset = State(initialValue: cardToEdit?.paymentDueDaysOffset ?? 10)
+    }
+    
+    private func localizedString(_ key: String, locale: Locale, arguments: CVarArg...) -> String {
+        if let path = Bundle.main.path(forResource: locale.identifier, ofType: "lproj"),
+           let bundle = Bundle(path: path) {
+            let format = NSLocalizedString(key, bundle: bundle, comment: "")
+            return String(format: format, locale: Locale(identifier: locale.identifier), arguments: arguments)
+        }
+        return key
     }
 
+    
     var body: some View {
         NavigationView {
             VStack {
                 Form {
                     Section(LocalizedStringKey("SECTION_CARD_INFO")) {
                         TextField(LocalizedStringKey("TEXTFIELD_CARD_NAME_PLACEHOLDER"), text: $cardName)
+
                         if #available(iOS 17.0, *) {
                             TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
                                 .keyboardType(.numberPad)
                                 .onChange(of: lastFourDigits) { newValue, _ in
                                     let filtered = newValue.filter { "0123456789".contains($0) }
-                                    if filtered.count > 4 {
-                                        lastFourDigits = String(filtered.prefix(4))
-                                    } else {
-                                        lastFourDigits = filtered
-                                    }
+                                    lastFourDigits = String(filtered.prefix(4))
                                 }
                         } else if #available(iOS 15.0, *) {
-                             TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
+                            TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
                                 .keyboardType(.numberPad)
                                 .onChange(of: lastFourDigits) { newValue in
                                     let filtered = newValue.filter { "0123456789".contains($0) }
-                                    if filtered.count > 4 {
-                                        lastFourDigits = String(filtered.prefix(4))
-                                    } else {
-                                        lastFourDigits = filtered
-                                    }
+                                    lastFourDigits = String(filtered.prefix(4))
                                 }
                         } else {
                             TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
@@ -71,12 +76,18 @@ struct CardFormView: View {
                     Section(LocalizedStringKey("SECTION_ACCOUNT_CUTOFF")) {
                         Picker(LocalizedStringKey("PICKER_DAY_OF_MONTH_LABEL"), selection: $selectedDay) {
                             ForEach(1...31, id: \.self) { day in
-                                // "DAY_TAG_FORMAT" anahtarı "%d. gün" veya "%d. day" gibi bir değere sahip olmalı
-                                Text(String(format: NSLocalizedString("DAY_TAG_FORMAT", comment: "Picker day format"), day)).tag(day)
+                                Text(String(format: NSLocalizedString("DAY_TAG_FORMAT", comment: ""), day)).tag(day)
                             }
                         }
                         .pickerStyle(.wheel)
                         .frame(height: 150)
+
+                        Stepper(
+                            localizedString("STEPPER_PAYMENT_DUE_OFFSET_LABEL", locale: currentLocale, arguments: paymentDueDaysOffset),
+                            value: $paymentDueDaysOffset,
+                            in: 1...30
+                        )
+
                     }
 
                     Section(LocalizedStringKey("SECTION_CARD_COLOR")) {
@@ -93,7 +104,7 @@ struct CardFormView: View {
                 }
 
                 HStack(spacing: 20) {
-                    Button(LocalizedStringKey("CANCEL")) { // "CANCEL" anahtarı daha önce tanımlanmıştı
+                    Button(LocalizedStringKey("CANCEL")) {
                         dismiss()
                     }
                     .frame(maxWidth: .infinity)
@@ -102,7 +113,7 @@ struct CardFormView: View {
                     .cornerRadius(8)
                     .foregroundColor(.primary)
 
-                    Button(LocalizedStringKey("SAVE")) { // "SAVE" anahtarı daha önce tanımlanmıştı
+                    Button(LocalizedStringKey("SAVE")) {
                         saveCard()
                     }
                     .disabled(cardName.isEmpty || lastFourDigits.count != 4)
@@ -117,13 +128,13 @@ struct CardFormView: View {
             .navigationTitle(mode == .add ? LocalizedStringKey("NAV_TITLE_ADD_CARD") : LocalizedStringKey("NAV_TITLE_EDIT_CARD"))
             .navigationBarTitleDisplayMode(.inline)
             .alert(LocalizedStringKey("ALERT_TITLE_DELETE_CARD"), isPresented: $showingDeleteAlert, presenting: cardToEdit) { card in
-                Button(LocalizedStringKey("BUTTON_DELETE_CARD"), role: .destructive) { // "BUTTON_DELETE_CARD" uyarı içindeki silme butonu için de kullanılabilir
+                Button(LocalizedStringKey("BUTTON_DELETE_CARD"), role: .destructive) {
                     if let indexSet = indexSet(for: card) {
                         dataManager.deleteCard(at: indexSet)
                     }
                     dismiss()
                 }
-                Button(LocalizedStringKey("CANCEL"), role: .cancel) {} // "CANCEL" anahtarı
+                Button(LocalizedStringKey("CANCEL"), role: .cancel) {}
             } message: { _ in
                 Text(LocalizedStringKey("ALERT_MESSAGE_DELETE_CARD_CONFIRMATION"))
             }
@@ -174,11 +185,13 @@ struct CardFormView: View {
 
     private func saveCard() {
         let colorString = colorToHexString(pickedColor)
+
         let card = CreditCard(
             id: cardToEdit?.id ?? UUID(),
             name: cardName,
             lastFourDigits: lastFourDigits,
             dueDate: selectedDay,
+            paymentDueDaysOffset: paymentDueDaysOffset,
             isActive: true,
             color: colorString
         )
@@ -189,7 +202,7 @@ struct CardFormView: View {
             dataManager.updateCard(card)
         }
 
-        let dueDates = DueDateCalculator.calculateDueDates(for: card, referenceDate: Date(), using: holidayService) // referenceDate eklendi
+        let dueDates = DueDateCalculator.calculateDueDates(for: card, using: holidayService)
         guard let nextDueDate = dueDates.first else {
             dismiss()
             return

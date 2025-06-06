@@ -48,6 +48,7 @@
 "NAV_TITLE_EDIT_CARD" = "Edit Card";
 "ALERT_TITLE_DELETE_CARD" = "Delete Card"; // Can also be used for the alert title
 "ALERT_MESSAGE_DELETE_CARD_CONFIRMATION" = "Are you sure you want to delete this card and its related reminder? This action cannot be undone.";
+"STEPPER_PAYMENT_DUE_OFFSET_LABEL" = "Payment day offset: %d"; // YENİ EKLENEN ANAHTAR
 
 // MainView Specific Keys
 "EMPTY_STATE_TITLE" = "No Cards Yet";

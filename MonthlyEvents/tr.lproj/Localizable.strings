@@ -15,7 +15,7 @@
 "CANCEL" = "Vazgeç";
 "KEYWORDS_PROMPT" = "Virgülle ayrılmış anahtar kelimeler girin. Takviminizdeki etkinliklerin bu kelimeleri içermesi durumunda gün tatil sayılacaktır.";
 "TURKISH" = "Türkçe";
-"ENGLISH" = "English"; // İngilizce için "English" kalabilir veya "İngilizce" yapabilirsiniz.
+"ENGLISH" = "English";
 
 // MainView Ortak Anahtarlar (SettingsView ve CardFormView tarafından da kullanılabilir)
 "MY_CARDS_TITLE" = "💳 Kartlarım";
@@ -48,6 +48,7 @@
 "NAV_TITLE_EDIT_CARD" = "Kartı Düzenle";
 "ALERT_TITLE_DELETE_CARD" = "Kartı Sil"; // Uyarı başlığı için de kullanılabilir
 "ALERT_MESSAGE_DELETE_CARD_CONFIRMATION" = "Bu kartı ve ilgili hatırlatmasını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.";
+"STEPPER_PAYMENT_DUE_OFFSET_LABEL" = "Ödeme için eklenecek gün: %d"; // YENİ EKLENEN ANAHTAR
 
 // MainView Özel Anahtarları
 "EMPTY_STATE_TITLE" = "Henüz Kart Yok";
