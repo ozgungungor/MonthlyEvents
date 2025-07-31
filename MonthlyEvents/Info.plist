@@ -2,20 +2,37 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.2</string>
+	<key>CFBundleVersion</key>
+	<string>3</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLIconFile</key>
 			<string>None</string>
 			<key>CFBundleURLName</key>
 			<string></string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>cardapp</string>
+				<string>paynify</string>
 			</array>
 		</dict>
 	</array>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>Fetch events in all your calendars and delete the ones you select in the app.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>Uygulama, size özel reklamlar gösterebilmek için izninizi talep eder.</string>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-4244659004257886~2678732633</string>
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
 </dict>
 </plist>

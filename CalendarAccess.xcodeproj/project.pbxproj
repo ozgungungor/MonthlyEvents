@@ -19,7 +19,11 @@
 		0D54A0162DE2F7B300DF28A3 /* DueDateCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A0152DE2F7AC00DF28A3 /* DueDateCalculator.swift */; };
 		0D54A0182DE2F9F400DF28A3 /* CardRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A0172DE2F9EF00DF28A3 /* CardRowView.swift */; };
 		0D54A0202DE3271E00DF28A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A01F2DE3271400DF28A3 /* AppDelegate.swift */; };
-		EB3F2B7229FC93500089E32B /* MonthlyEventsApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB3F2B7129FC93500089E32B /* MonthlyEventsApp.swift */; };
+		0DF2C81E2E2A2CBB00D19E03 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 0DF2C81D2E2A2CBB00D19E03 /* GoogleMobileAds */; };
+		0DF2C8202E2A2D4800D19E03 /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF2C81F2E2A2D3E00D19E03 /* BannerView.swift */; };
+		0DF2C8232E3B9F6500D19E03 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DF2C8222E3B9F6500D19E03 /* StoreKit.framework */; };
+		0DF2C8252E3B9F7B00D19E03 /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF2C8242E3B9F7900D19E03 /* IAPManager.swift */; };
+		EB3F2B7229FC93500089E32B /* PaynifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB3F2B7129FC93500089E32B /* PaynifyApp.swift */; };
 		EB3F2B7629FC93510089E32B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB3F2B7529FC93510089E32B /* Assets.xcassets */; };
 		EB3F2B7929FC93510089E32B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB3F2B7829FC93510089E32B /* Preview Assets.xcassets */; };
 /* End PBXBuildFile section */
@@ -38,9 +42,12 @@
 		0D54A0152DE2F7AC00DF28A3 /* DueDateCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueDateCalculator.swift; sourceTree = "<group>"; };
 		0D54A0172DE2F9EF00DF28A3 /* CardRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRowView.swift; sourceTree = "<group>"; };
 		0D54A01F2DE3271400DF28A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		0DF2C81F2E2A2D3E00D19E03 /* BannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerView.swift; sourceTree = "<group>"; };
+		0DF2C8222E3B9F6500D19E03 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk/System/Library/Frameworks/StoreKit.framework; sourceTree = DEVELOPER_DIR; };
+		0DF2C8242E3B9F7900D19E03 /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
 		81A54031805BB342741C155A /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = ../Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
-		EB3F2B6F29FC93500089E32B /* MonthlyEvents.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonthlyEvents.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EB3F2B7129FC93500089E32B /* MonthlyEventsApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonthlyEventsApp.swift; sourceTree = "<group>"; };
+		EB3F2B6F29FC93500089E32B /* Paynify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Paynify.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB3F2B7129FC93500089E32B /* PaynifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaynifyApp.swift; sourceTree = "<group>"; };
 		EB3F2B7529FC93510089E32B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		EB3F2B7829FC93510089E32B /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		EB3F2B7D29FC93B60089E32B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -52,12 +59,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DF2C81E2E2A2CBB00D19E03 /* GoogleMobileAds in Frameworks */,
+				0DF2C8232E3B9F6500D19E03 /* StoreKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0DF2C8212E3B9F6500D19E03 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0DF2C8222E3B9F6500D19E03 /* StoreKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		4A1721DD48244303BD993F54 /* LICENSE */ = {
 			isa = PBXGroup;
 			children = (
@@ -79,7 +96,7 @@
 			children = (
 				EB3F2B7D29FC93B60089E32B /* Info.plist */,
 				0D4C3C1E2DEF966F00D63E1A /* Localizable.strings */,
-				EB3F2B7129FC93500089E32B /* MonthlyEventsApp.swift */,
+				EB3F2B7129FC93500089E32B /* PaynifyApp.swift */,
 				EB3F2B7E29FC944F0089E32B /* Views */,
 				EB3F2B7529FC93510089E32B /* Assets.xcassets */,
 				EB3F2B7729FC93510089E32B /* Preview Content */,
@@ -99,6 +116,8 @@
 		EB3F2B7E29FC944F0089E32B /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0DF2C8242E3B9F7900D19E03 /* IAPManager.swift */,
+				0DF2C81F2E2A2D3E00D19E03 /* BannerView.swift */,
 				0D4C3C182DEF90D800D63E1A /* SettingsView.swift */,
 				0D169E752DEB135200752449 /* CalendarManager.swift */,
 				0D54A01F2DE3271400DF28A3 /* AppDelegate.swift */,
@@ -120,13 +139,14 @@
 				EB3F2B7029FC93500089E32B /* MonthlyEvents */,
 				EBC88DC829FC868F00302532 /* Products */,
 				4A1721DD48244303BD993F54 /* LICENSE */,
+				0DF2C8212E3B9F6500D19E03 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
 		EBC88DC829FC868F00302532 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				EB3F2B6F29FC93500089E32B /* MonthlyEvents.app */,
+				EB3F2B6F29FC93500089E32B /* Paynify.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -134,9 +154,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EB3F2B6E29FC93500089E32B /* MonthlyEvents */ = {
+		EB3F2B6E29FC93500089E32B /* Paynify */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EB3F2B7A29FC93510089E32B /* Build configuration list for PBXNativeTarget "MonthlyEvents" */;
+			buildConfigurationList = EB3F2B7A29FC93510089E32B /* Build configuration list for PBXNativeTarget "Paynify" */;
 			buildPhases = (
 				EB3F2B6B29FC93500089E32B /* Sources */,
 				EB3F2B6C29FC93500089E32B /* Frameworks */,
@@ -146,9 +166,9 @@
 			);
 			dependencies = (
 			);
-			name = MonthlyEvents;
+			name = Paynify;
 			productName = MonthlyEvents;
-			productReference = EB3F2B6F29FC93500089E32B /* MonthlyEvents.app */;
+			productReference = EB3F2B6F29FC93500089E32B /* Paynify.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -177,11 +197,14 @@
 				tr,
 			);
 			mainGroup = EB6B9BAE29FC860700EA1B38;
+			packageReferences = (
+				0DF2C81C2E2A2CBB00D19E03 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			productRefGroup = EBC88DC829FC868F00302532 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				EB3F2B6E29FC93500089E32B /* MonthlyEvents */,
+				EB3F2B6E29FC93500089E32B /* Paynify */,
 			);
 		};
 /* End PBXProject section */
@@ -204,6 +227,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0DF2C8252E3B9F7B00D19E03 /* IAPManager.swift in Sources */,
 				0D54A0162DE2F7B300DF28A3 /* DueDateCalculator.swift in Sources */,
 				0D54A0122DE2F72700DF28A3 /* NotificationManager.swift in Sources */,
 				0D169E762DEB135F00752449 /* CalendarManager.swift in Sources */,
@@ -214,7 +238,8 @@
 				0D54A0182DE2F9F400DF28A3 /* CardRowView.swift in Sources */,
 				0D54A00A2DE2F5C900DF28A3 /* MainView.swift in Sources */,
 				0D54A00C2DE2F61900DF28A3 /* CardFormView.swift in Sources */,
-				EB3F2B7229FC93500089E32B /* MonthlyEventsApp.swift in Sources */,
+				EB3F2B7229FC93500089E32B /* PaynifyApp.swift in Sources */,
+				0DF2C8202E2A2D4800D19E03 /* BannerView.swift in Sources */,
 				0D4C3C192DEF90DD00D63E1A /* SettingsView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -242,6 +267,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -272,8 +298,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
-				DEBUG_INFORMATION_FORMAT = dwarf;
+				CURRENT_PROJECT_VERSION = 3;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"MonthlyEvents/Preview Content\"";
 				DEVELOPMENT_TEAM = RBRWPSRQSR;
 				ENABLE_PREVIEWS = YES;
@@ -308,19 +334,23 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ozgungungor.MonthlyEvents;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ozgungungor.Paynify;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -332,6 +362,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -362,7 +393,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"MonthlyEvents/Preview Content\"";
 				DEVELOPMENT_TEAM = RBRWPSRQSR;
@@ -392,18 +423,22 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.ozgungungor.MonthlyEvents;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ozgungungor.Paynify;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -433,7 +468,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EB3F2B7A29FC93510089E32B /* Build configuration list for PBXNativeTarget "MonthlyEvents" */ = {
+		EB3F2B7A29FC93510089E32B /* Build configuration list for PBXNativeTarget "Paynify" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				EB3F2B7B29FC93510089E32B /* Debug */,
@@ -452,6 +487,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		0DF2C81C2E2A2CBB00D19E03 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.7.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0DF2C81D2E2A2CBB00D19E03 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0DF2C81C2E2A2CBB00D19E03 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EB6B9BAF29FC860700EA1B38 /* Project object */;
 }

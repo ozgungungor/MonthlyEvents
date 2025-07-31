@@ -1,8 +1,8 @@
-// SettingsView Keys
+/* SettingsView Keys */
 "SETTINGS_TITLE" = "Ayarlar";
 "WEEKLY_HOLIDAYS_SECTION_HEADER" = "HAFTALIK TATİL GÜNLERİ";
 "CALENDAR_HOLIDAY_KEYWORDS_SECTION_HEADER" = "TAKVİM TATİLİ ANAHTAR KELİMELERİ";
-"LANGUAGE_SETTINGS_SECTION_HEADER" = "Dil";
+"LANGUAGE_SETTINGS_SECTION_HEADER" = "Dil Ayarları";
 "SELECT_LANGUAGE_PICKER_LABEL" = "Dil Seçin";
 "MONDAY" = "Pazartesi";
 "TUESDAY" = "Salı";
@@ -16,52 +16,116 @@
 "KEYWORDS_PROMPT" = "Virgülle ayrılmış anahtar kelimeler girin. Takviminizdeki etkinliklerin bu kelimeleri içermesi durumunda gün tatil sayılacaktır.";
 "TURKISH" = "Türkçe";
 "ENGLISH" = "English";
+"SETTINGS_LANGUAGE_SYSTEM" = "Sistem Dili";
 
-// MainView Ortak Anahtarlar (SettingsView ve CardFormView tarafından da kullanılabilir)
-"MY_CARDS_TITLE" = "💳 Kartlarım";
-"CALENDAR_ACCESS_GRANTED" = "Takvim verilerine erişim var - Bayramlar dahil hesaplanıyor";
-"CALENDAR_ACCESS_DENIED" = "Takvim erişimi yok - Sadece temel tatiller hesaplanıyor";
+/* MainView Ortak Anahtarlar (SettingsView ve CardFormView tarafından da kullanılabilir) */
+"MY_CARDS_TITLE" = "💳 Ödemelerim";
+"CALENDAR_ACCESS_GRANTED" = "Takvim verilerine erişim var - Resmi tatiller dahil.";
+"CALENDAR_ACCESS_DENIED" = "Takvim erişimi yok - Sadece haftalık tatiller hesaplanıyor.";
 "SETTINGS_GEAR_ACCESSIBILITY_LABEL" = "Ayarlar";
-"ADD_CARD_ACCESSIBILITY_LABEL" = "Kart Ekle";
+"ADD_ITEM_ACCESSIBILITY_LABEL" = "Öğe Ekle";
 
-// CardRowView Keys
+/* CardRowView Keys */
 "PAYMENT_DAY_TODAY" = "💡 Ödeme Günü: Bugün";
-"NEXT_MONTH_DUE_DATE" = "🔁 Sonraki Ay: %@"; // %@ tarih ile değiştirilecek
-"DUE_DATE_DISPLAY" = "Son Ödeme: %@"; // %@ tarih ile değiştirilecek
+"NEXT_MONTH_DUE_DATE" = "🔁 Sonraki Ay: %@";
+"DUE_DATE_DISPLAY" = "Son Ödeme: %@";
 "DUE_DATE_UNAVAILABLE" = "⚠️ Son Ödeme Tarihi Belirlenemedi";
+"LOAN_INSTALLMENT_STATUS" = "Kalan Taksit: %d / %d";
+"LOAN_COMPLETED" = "✓ Kredi Ödemesi Tamamlandı";
+"SUBSCRIPTION_MONTHLY_STATUS" = "Aylık Faturalandırma";
+"SUBSCRIPTION_ANNUAL_STATUS" = "%@ Ayında Yıllık Faturalandırma";
 
-// NotificationManager Keys (Bildirim metinleri)
-"CREDIT_CARD_REMINDER_TITLE" = "💳 Kredi Kartı Hatırlatması";
-"CREDIT_CARD_REMINDER_BODY" = "%@ kartınızın son ödeme günü yaklaştı! (**** %@)"; // 1. %@ kart adı, 2. %@ son 4 hane
+/* NotificationManager Keys (Bildirim metinleri) */
+"NOTIFICATION_TITLE_CARD" = "💳 Kart Hatırlatması";
+"NOTIFICATION_BODY_CARD" = "%@ kartınızın (**** %@) son ödeme günü yaklaşıyor!"; // Düzeltildi
+"NOTIFICATION_TITLE_LOAN" = "💸 Kredi Hatırlatması";
+"NOTIFICATION_BODY_LOAN" = "Kalan taksit: %d/%d.";
+"NOTIFICATION_BODY_GENERAL" = "%@ için son ödeme günü yaklaşıyor!";
+"NOTIFICATION_TITLE_ONETIME" = "🗓️ Ödeme Hatırlatması";
+"NOTIFICATION_BODY_ONETIME" = "%@ için tek seferlik ödeme günü yaklaşıyor!"; // Yeni eklendi
+"NOTIFICATION_TITLE_SUBSCRIPTION" = "Abonelik Hatırlatması";
+"NOTIFICATION_BODY_SUBSCRIPTION" = "%@ aboneliğinizin ödeme günü yaklaşıyor!"; // Yeni eklendi
+"NOTIFICATION_BODY_SUBSCRIPTION_ANNUAL" = "%@ aboneliğinizin yıllık ödemesi (%@) yaklaşıyor!"; // Yeni eklendi
 
-// CardFormView Keys
-"SECTION_CARD_INFO" = "Kart Bilgileri";
-"TEXTFIELD_CARD_NAME_PLACEHOLDER" = "Kart Adı (örn: Banka Adı)";
+/* CardFormView Keys */
+"SECTION_GENERAL_INFO" = "Genel Bilgiler";
+"TEXTFIELD_ITEM_NAME_PLACEHOLDER" = "Öğe Adı (örn: Kira, Kredi)";
 "TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER" = "Son 4 Hane";
-"SECTION_ACCOUNT_CUTOFF" = "Hesap Kesim";
+"SECTION_PAYMENT_DETAILS" = "Ödeme Detayları";
 "PICKER_DAY_OF_MONTH_LABEL" = "Ayın Günü";
-"DAY_TAG_FORMAT" = "%d. gün"; // Picker içindeki "1. gün", "2. gün" vb. için
-"SECTION_CARD_COLOR" = "Kart Rengi";
+"DAY_TAG_FORMAT" = "%d. gün";
+"SECTION_ITEM_COLOR" = "Öğe Rengi";
 "COLORPICKER_SELECT_COLOR_LABEL" = "Renk Seç";
-"BUTTON_DELETE_CARD" = "Kartı Sil";
-"NAV_TITLE_ADD_CARD" = "Yeni Kart Ekle";
-"NAV_TITLE_EDIT_CARD" = "Kartı Düzenle";
-"ALERT_TITLE_DELETE_CARD" = "Kartı Sil"; // Uyarı başlığı için de kullanılabilir
-"ALERT_MESSAGE_DELETE_CARD_CONFIRMATION" = "Bu kartı ve ilgili hatırlatmasını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.";
-"STEPPER_PAYMENT_DUE_OFFSET_LABEL" = "Ödeme için eklenecek gün: %d"; // YENİ EKLENEN ANAHTAR
+"BUTTON_DELETE_ITEM" = "Öğeyi Sil";
+"NAV_TITLE_ADD_ITEM" = "Yeni Öğe Ekle";
+"NAV_TITLE_EDIT_ITEM" = "Öğeyi Düzenle";
+"ALERT_TITLE_DELETE_ITEM" = "Öğeyi Sil";
+"ALERT_MESSAGE_DELETE_ITEM_CONFIRMATION" = "Bu öğeyi ve ilgili hatırlatmalarını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.";
+"STEPPER_PAYMENT_DUE_OFFSET_LABEL" = "Eklenecek Gün";
+"STEPPER_LOAN_INSTALLMENTS_LABEL" = "Taksit Sayısı";
+"STEPPER_ANNUAL_BILLING_MONTH_LABEL" = "Yıllık Ödeme Ayı";
 
-// MainView Özel Anahtarları
-"EMPTY_STATE_TITLE" = "Henüz Kart Yok";
-"EMPTY_STATE_MESSAGE" = "İlk kredi kartınızı eklemek ve son ödeme tarihlerini takip etmeye başlamak için '+' butonuna dokunun.";
-"EMPTY_STATE_ADD_CARD_BUTTON" = "İlk Kartı Ekle";
+/* MainView Özel Anahtarları */
+"EMPTY_STATE_TITLE_ITEM" = "Henüz Öğe Yok";
+"EMPTY_STATE_MESSAGE_ITEM" = "İlk öğenizi eklemek ve son ödeme tarihlerini takip etmeye başlamak için '+' butonuna dokunun.";
+"EMPTY_STATE_ADD_ITEM_BUTTON" = "İlk Öğeyi Ekle";
 
 "ALERT_PERMISSION_REQUIRED_TITLE" = "İzin Gerekli";
 "ALERT_BUTTON_GO_TO_SETTINGS" = "Ayarlara Git";
 "ALERT_BUTTON_OK" = "Tamam";
 
 "PERMISSION_ALERT_BASE_MESSAGE" = "Uygulamanın bazı özellikleri için aşağıdaki izinler gereklidir:";
-"PERMISSION_ALERT_NOTIFICATION_DENIED" = "Bildirim izni reddedildi: Hatırlatmalar için Ayarlar'dan bildirimlere izin vermeniz gerekir.";
-"PERMISSION_ALERT_NOTIFICATION_NOT_DETERMINED" = "Bildirim izni: Hatırlatmaları almak için bildirimlere izin vermeniz önerilir.";
-"PERMISSION_ALERT_CALENDAR_DENIED" = "Takvim izni (Tam Erişim) verilmedi/kısıtlı: Ramazan/Kurban Bayramı gibi değişken tatilleri doğru hesaplamak için Ayarlar'dan takviminize 'Tam Erişim' izni vermeniz gerekir.";
-"PERMISSION_ALERT_CALENDAR_NOT_AVAILABLE" = "Takvim izni (Tam Erişim) alınamadı: Ramazan/Kurban Bayramı gibi değişken tatilleri doğru hesaplamak için takvim erişimi gereklidir.";
+"PERM_MSG_NOTIF_DENIED_DETAIL" = "Bildirim izni reddedildi: Hatırlatmalar için Ayarlar'dan bildirimlere izin vermeniz gerekir.";
+"PERM_MSG_NOTIF_NOT_DETERMINED_DETAIL" = "Bildirim izni: Hatırlatmaları almak için bildirimlere izin vermeniz önerilir.";
+"PERM_MSG_CALENDAR_DENIED_DETAIL_FULL_ACCESS" = "Takvim izni (Tam Erişim) reddedildi/kısıtlı: Resmi tatilleri doğru hesaplamak için Ayarlar'dan takviminize 'Tam Erişim' izni vermeniz gerekir.";
+"PERM_MSG_CALENDAR_NOT_OBTAINED_FULL_ACCESS" = "Takvim izni (Tam Erişim) alınamadı: Resmi tatilleri doğru hesaplamak için takvim erişimi gereklidir.";
 "PERMISSION_ALERT_MANAGE_IN_SETTINGS" = "İzinleri Ayarlar uygulamasından yönetebilirsiniz.";
+
+/* Yeni Eklenen Anahtarlar */
+"PICKER_PAYMENT_TYPE_LABEL" = "Ödeme Türü";
+
+"PAYMENT_TYPE_CARD" = "Kart";
+"PAYMENT_TYPE_LOAN" = "Kredi";
+"PAYMENT_TYPE_ONETIME" = "Tek Seferlik";
+"PAYMENT_TYPE_SUBSCRIPTION" = "Abonelik";
+
+/* Grup Başlıkları */
+"PAYMENT_TYPE_CARD_HEADER" = "Kredi Kartları";
+"PAYMENT_TYPE_LOAN_HEADER" = "Krediler";
+"PAYMENT_TYPE_ONETIME_HEADER" = "Tek Seferlik Ödemeler";
+"PAYMENT_TYPE_SUBSCRIPTION_HEADER" = "Abonelikler";
+
+/* Takvim Etkinlik Başlıkları */
+"CALENDAR_TITLE" = "Ödeme Hatırlatmaları";
+"CALENDAR_EVENT_TITLE_CARD" = "%@ Ekstre Ödemesi";
+"CALENDAR_EVENT_TITLE_LOAN" = "%@ Kredisi (%d/%d)";
+"CALENDAR_EVENT_TITLE_LOAN_SIMPLE" = "%@ Kredi Ödemesi";
+"CALENDAR_EVENT_TITLE_ONETIME" = "Ödeme: %@";
+"CALENDAR_EVENT_TITLE_SUBSCRIPTION_MONTHLY" = "%@ Abonelik Ödemesi";
+"CALENDAR_EVENT_TITLE_SUBSCRIPTION_ANNUAL" = "%@ Abonelik Ödemesi (%@)";
+
+/* Diğer Yeni Eklenen Birimler */
+"UNIT_DAY" = "gün";
+"UNIT_INSTALLMENT" = "taksit";
+"UNIT_MONTH" = "ay";
+"PICKER_BILLING_CYCLE_LABEL" = "Ödeme Döngüsü";
+"BILLING_CYCLE_MONTHLY" = "Aylık";
+"BILLING_CYCLE_ANNUALLY" = "Yıllık";
+
+"DONE_BUTTON_KEYBOARD" = "Bitti";
+"IN_APP_PURCHASES_SECTION_HEADER" = "Uygulama İçi Satın Almalar";
+"REMOVE_ADS_PURCHASE_BUTTON_LABEL" = "Reklamları Kaldır";
+"REMOVE_ADS_LOADING_MESSAGE" = "Reklamları Kaldır yükleniyor...";
+"ADS_REMOVED_MESSAGE" = "Reklamlar Kaldırıldı!";
+"SUPPORT_US_SECTION_HEADER" = "Bizi Destekle";
+"RESTORE_PURCHASES_BUTTON_LABEL" = "Satın Almaları Geri Yükle";
+"PURCHASE_SUCCESS_MESSAGE" = "Satın alma başarılı!";
+"RESTORE_SUCCESS_MESSAGE" = "Satın almalar başarıyla geri yüklendi!";
+"PURCHASE_FAILED_MESSAGE" = "Satın alma başarısız oldu.";
+"PURCHASE_STATUS_TITLE" = "Satın Alma Durumu";
+"ALERT_BUTTON_OK" = "Tamam";
+
+// Destek ürünleri için başlıklar (App Store Connect'teki ürün adlarıyla eşleşmeli)
+"Support Small" = "Küçük Destek";
+"Support Medium" = "Orta Destek";
+"Support Large" = "Büyük Destek";

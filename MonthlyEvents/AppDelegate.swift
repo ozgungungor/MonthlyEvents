@@ -10,43 +10,44 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         return true
     }
     
+    // BİLDİRİM TIKLANDIĞINDA ÇALIŞAN FONKSİYON
     func userNotificationCenter(_ center: UNUserNotificationCenter,
                                 didReceive response: UNNotificationResponse,
                                 withCompletionHandler completionHandler: @escaping () -> Void) {
-        let identifier = response.notification.request.identifier
         
-        if let uuid = UUID(uuidString: identifier),
-           let card = CardDataManager.shared.card(withId: uuid) {
+        if let cardIDString = response.notification.request.content.userInfo["cardID"] as? String,
+           let cardID = UUID(uuidString: cardIDString) {
             
-            // Ödeme tarihleri dizisini alıyoruz
-            let dueDates = DueDateCalculator.calculateDueDates(for: card, using: HolidayService.shared)
+            NotificationCenter.default.post(name: Notification.Name("OpenCard"), object: cardIDString)
             
-            // İlk ödeme tarihini güvenle alıyoruz
-            guard let newDueDate = dueDates.first else {
-                completionHandler()
-                return
+            let languageIdentifier = UserDefaults.standard.string(forKey: "appLanguage") ?? Locale.current.identifier
+            let locale = Locale(identifier: languageIdentifier)
+            
+            if let card = CardDataManager.shared.card(withId: cardID) {
+                let dueDates = DueDateCalculator.calculateDueDates(for: card, using: HolidayService.shared)
+                NotificationManager.shared.scheduleReminders(for: card, dueDates: dueDates, locale: locale)
             }
-            
-            NotificationManager.shared.scheduleReminder(for: card, dueDate: newDueDate)
-            
-            // Kart ID'yi SwiftUI veya diğer modüllere bildiriyoruz
-            NotificationCenter.default.post(name: Notification.Name("OpenCard"), object: uuid.uuidString)
         }
         
         completionHandler()
     }
     
+    // TAKVİMDEKİ ETKİNLİKTEN UYGULAMA AÇILDIĞINDA ÇALIŞAN FONKSİYON (GÜNCELLENDİ)
     func application(_ app: UIApplication,
                      open url: URL,
                      options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         print("Uygulama URL ile açıldı: \(url)")
         
-        if url.scheme == "cardapp" {
-            if url.host == "card", let cardID = url.pathComponents.dropFirst().first {
-                print("Kart ID geldi: \(cardID)")
-                NotificationCenter.default.post(name: Notification.Name("OpenCard"), object: cardID)
-                return true
-            }
+        // URL şeması "paynify" olarak güncellendi
+        if url.scheme == "paynify", // <-- DEĞİŞTİ
+           url.host == "open",
+           url.pathComponents.count > 2,
+           url.pathComponents[1] == "item",
+           let cardID = url.pathComponents.last {
+            
+            print("Kart ID geldi: \(cardID)")
+            NotificationCenter.default.post(name: Notification.Name("OpenCard"), object: cardID)
+            return true
         }
         
         return false

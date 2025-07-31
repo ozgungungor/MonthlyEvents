@@ -1,8 +1,8 @@
-// SettingsView Keys
+/* SettingsView Keys */
 "SETTINGS_TITLE" = "Settings";
 "WEEKLY_HOLIDAYS_SECTION_HEADER" = "WEEKLY HOLIDAYS";
 "CALENDAR_HOLIDAY_KEYWORDS_SECTION_HEADER" = "CALENDAR HOLIDAY KEYWORDS";
-"LANGUAGE_SETTINGS_SECTION_HEADER" = "Language";
+"LANGUAGE_SETTINGS_SECTION_HEADER" = "Language Settings";
 "SELECT_LANGUAGE_PICKER_LABEL" = "Select Language";
 "MONDAY" = "Monday";
 "TUESDAY" = "Tuesday";
@@ -13,55 +13,119 @@
 "SUNDAY" = "Sunday";
 "SAVE" = "Save";
 "CANCEL" = "Cancel";
-"KEYWORDS_PROMPT" = "Enter comma-separated keywords. Days will be considered holidays if events in your calendar contain these words.";
-"TURKISH" = "Turkish";
+"KEYWORDS_PROMPT" = "Enter keywords separated by commas. Days will be considered holidays if calendar events contain these words.";
+"TURKISH" = "Türkçe";
 "ENGLISH" = "English";
+"SETTINGS_LANGUAGE_SYSTEM" = "System Language";
 
-// Common Keys for MainView (also usable by SettingsView and CardFormView)
-"MY_CARDS_TITLE" = "💳 My Cards";
-"CALENDAR_ACCESS_GRANTED" = "Calendar access granted - Calculating including holidays";
-"CALENDAR_ACCESS_DENIED" = "No calendar access - Calculating basic holidays only";
+/* MainView Common Keys (Can also be used by SettingsView and CardFormView) */
+"MY_CARDS_TITLE" = "💳 My Payments";
+"CALENDAR_ACCESS_GRANTED" = "Calendar access granted - Public holidays included.";
+"CALENDAR_ACCESS_DENIED" = "Calendar access denied - Only weekly holidays calculated.";
 "SETTINGS_GEAR_ACCESSIBILITY_LABEL" = "Settings";
-"ADD_CARD_ACCESSIBILITY_LABEL" = "Add Card";
+"ADD_ITEM_ACCESSIBILITY_LABEL" = "Add Item";
 
-// CardRowView Keys
-"PAYMENT_DAY_TODAY" = "💡 Payment Day: Today";
-"NEXT_MONTH_DUE_DATE" = "🔁 Next Month: %@"; // %@ will be replaced with the date
-"DUE_DATE_DISPLAY" = "Due Date: %@"; // %@ will be replaced with the date
-"DUE_DATE_UNAVAILABLE" = "⚠️ Due Date Could Not Be Determined";
+/* CardRowView Keys */
+"PAYMENT_DAY_TODAY" = "💡 Payment Due: Today";
+"NEXT_MONTH_DUE_DATE" = "🔁 Next Month: %@";
+"DUE_DATE_DISPLAY" = "Due Date: %@";
+"DUE_DATE_UNAVAILABLE" = "⚠️ Due Date Unavailable";
+"LOAN_INSTALLMENT_STATUS" = "Remaining Installment: %d / %d";
+"LOAN_COMPLETED" = "✓ Loan Payment Completed";
+"SUBSCRIPTION_MONTHLY_STATUS" = "Monthly Billing";
+"SUBSCRIPTION_ANNUAL_STATUS" = "Annual Billing in %@";
 
-// NotificationManager Keys (Notification texts)
-"CREDIT_CARD_REMINDER_TITLE" = "💳 Credit Card Reminder";
-"CREDIT_CARD_REMINDER_BODY" = "The due date for your %@ card is approaching! (**** %@)"; // 1st %@ is card name, 2nd %@ is last four digits
+/* NotificationManager Keys (Notification texts) */
+"NOTIFICATION_TITLE_CARD" = "💳 Card Reminder";
+"NOTIFICATION_BODY_CARD" = "Your %@ card (**** %@) payment is due soon!"; // Corrected format: two string args
+"NOTIFICATION_TITLE_LOAN" = "💸 Loan Reminder";
+"NOTIFICATION_BODY_LOAN" = "Remaining installment: %d/%d.";
+"NOTIFICATION_BODY_GENERAL" = "Payment for %@ is due soon!";
+"NOTIFICATION_TITLE_ONETIME" = "🗓️ Payment Reminder";
+"NOTIFICATION_BODY_ONETIME" = "One-time payment for %@ is due soon!"; // New
+"NOTIFICATION_TITLE_SUBSCRIPTION" = "Subscription Reminder";
+"NOTIFICATION_BODY_SUBSCRIPTION" = "Your %@ subscription payment is due soon!"; // New
+"NOTIFICATION_BODY_SUBSCRIPTION_ANNUAL" = "Your %@ annual subscription payment (%@) is due soon!"; // New
 
-// CardFormView Keys
-"SECTION_CARD_INFO" = "Card Information";
-"TEXTFIELD_CARD_NAME_PLACEHOLDER" = "Card Name (e.g., Bank Name)";
+/* CardFormView Keys */
+"SECTION_GENERAL_INFO" = "General Information";
+"TEXTFIELD_ITEM_NAME_PLACEHOLDER" = "Item Name (e.g., Rent, Loan)";
 "TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER" = "Last 4 Digits";
-"SECTION_ACCOUNT_CUTOFF" = "Account Cutoff";
+"SECTION_PAYMENT_DETAILS" = "Payment Details";
 "PICKER_DAY_OF_MONTH_LABEL" = "Day of Month";
-"DAY_TAG_FORMAT" = "%d"; // For "1", "2" etc. in picker. Add "st", "nd", "rd", "th" if needed, e.g., "%dst"
-"SECTION_CARD_COLOR" = "Card Color";
+"DAY_TAG_FORMAT" = "Day %d";
+"SECTION_ITEM_COLOR" = "Item Color";
 "COLORPICKER_SELECT_COLOR_LABEL" = "Select Color";
-"BUTTON_DELETE_CARD" = "Delete Card";
-"NAV_TITLE_ADD_CARD" = "Add New Card";
-"NAV_TITLE_EDIT_CARD" = "Edit Card";
-"ALERT_TITLE_DELETE_CARD" = "Delete Card"; // Can also be used for the alert title
-"ALERT_MESSAGE_DELETE_CARD_CONFIRMATION" = "Are you sure you want to delete this card and its related reminder? This action cannot be undone.";
-"STEPPER_PAYMENT_DUE_OFFSET_LABEL" = "Payment day offset: %d"; // YENİ EKLENEN ANAHTAR
+"BUTTON_DELETE_ITEM" = "Delete Item";
+"NAV_TITLE_ADD_ITEM" = "Add New Item";
+"NAV_TITLE_EDIT_ITEM" = "Edit Item";
+"ALERT_TITLE_DELETE_ITEM" = "Delete Item";
+"ALERT_MESSAGE_DELETE_ITEM_CONFIRMATION" = "Are you sure you want to delete this item and its reminders? This action cannot be undone.";
+"STEPPER_PAYMENT_DUE_OFFSET_LABEL" = "Days to Add";
+"STEPPER_LOAN_INSTALLMENTS_LABEL" = "Number of Installments";
+"STEPPER_ANNUAL_BILLING_MONTH_LABEL" = "Annual Billing Month";
 
-// MainView Specific Keys
-"EMPTY_STATE_TITLE" = "No Cards Yet";
-"EMPTY_STATE_MESSAGE" = "Tap the '+' button to add your first credit card and start tracking due dates.";
-"EMPTY_STATE_ADD_CARD_BUTTON" = "Add First Card";
+/* MainView Specific Keys */
+"EMPTY_STATE_TITLE_ITEM" = "No Items Yet";
+"EMPTY_STATE_MESSAGE_ITEM" = "Tap the '+' button to add your first item and start tracking due dates.";
+"EMPTY_STATE_ADD_ITEM_BUTTON" = "Add First Item";
 
 "ALERT_PERMISSION_REQUIRED_TITLE" = "Permission Required";
 "ALERT_BUTTON_GO_TO_SETTINGS" = "Go to Settings";
 "ALERT_BUTTON_OK" = "OK";
 
-"PERMISSION_ALERT_BASE_MESSAGE" = "The app requires the following permissions for some features:";
-"PERMISSION_ALERT_NOTIFICATION_DENIED" = "Notification permission denied: You need to allow notifications in Settings for reminders.";
-"PERMISSION_ALERT_NOTIFICATION_NOT_DETERMINED" = "Notification permission: It is recommended to allow notifications to receive reminders.";
-"PERMISSION_ALERT_CALENDAR_DENIED" = "Calendar permission (Full Access) not granted/restricted: To correctly calculate variable holidays like Eid, you need to grant 'Full Access' to your calendar in Settings.";
-"PERMISSION_ALERT_CALENDAR_NOT_AVAILABLE" = "Calendar permission (Full Access) could not be obtained: Calendar access is required to correctly calculate variable holidays like Eid.";
-"PERMISSION_ALERT_MANAGE_IN_SETTINGS" = "You can manage permissions in the Settings app.";
+"PERMISSION_ALERT_BASE_MESSAGE" = "Some features of the app require the following permissions:";
+"PERM_MSG_NOTIF_DENIED_DETAIL" = "Notification permission denied: You need to allow notifications from Settings for reminders.";
+"PERM_MSG_NOTIF_NOT_DETERMINED_DETAIL" = "Notification permission: It's recommended to allow notifications to receive reminders.";
+"PERM_MSG_CALENDAR_DENIED_DETAIL_FULL_ACCESS" = "Calendar permission (Full Access) denied/restricted: You need to grant 'Full Access' to your calendar from Settings to accurately calculate public holidays.";
+"PERM_MSG_CALENDAR_NOT_OBTAINED_FULL_ACCESS" = "Calendar permission (Full Access) not obtained: Calendar access is required to accurately calculate public holidays.";
+"PERMISSION_ALERT_MANAGE_IN_SETTINGS" = "You can manage permissions from the Settings app.";
+
+/* Newly Added Keys */
+"PICKER_PAYMENT_TYPE_LABEL" = "Payment Type";
+
+"PAYMENT_TYPE_CARD" = "Card";
+"PAYMENT_TYPE_LOAN" = "Loan";
+"PAYMENT_TYPE_ONETIME" = "One-Time Payment";
+"PAYMENT_TYPE_SUBSCRIPTION" = "Subscription";
+
+/* Group Headers */
+"PAYMENT_TYPE_CARD_HEADER" = "Credit Cards";
+"PAYMENT_TYPE_LOAN_HEADER" = "Loans";
+"PAYMENT_TYPE_ONETIME_HEADER" = "One-Time Payments";
+"PAYMENT_TYPE_SUBSCRIPTION_HEADER" = "Subscriptions";
+
+/* Calendar Event Titles */
+"CALENDAR_TITLE" = "Payment Reminders";
+"CALENDAR_EVENT_TITLE_CARD" = "%@ Statement Due";
+"CALENDAR_EVENT_TITLE_LOAN" = "%@ Loan (%d/%d)";
+"CALENDAR_EVENT_TITLE_LOAN_SIMPLE" = "%@ Loan Payment";
+"CALENDAR_EVENT_TITLE_ONETIME" = "Payment: %@";
+"CALENDAR_EVENT_TITLE_SUBSCRIPTION_MONTHLY" = "%@ Subscription Payment";
+"CALENDAR_EVENT_TITLE_SUBSCRIPTION_ANNUAL" = "%@ Subscription Payment (%@)";
+
+/* Other Newly Added Units */
+"UNIT_DAY" = "days";
+"UNIT_INSTALLMENT" = "installments";
+"UNIT_MONTH" = "months";
+"PICKER_BILLING_CYCLE_LABEL" = "Billing Cycle";
+"BILLING_CYCLE_MONTHLY" = "Monthly";
+"BILLING_CYCLE_ANNUALLY" = "Annually";
+
+"DONE_BUTTON_KEYBOARD" = "Done";
+"IN_APP_PURCHASES_SECTION_HEADER" = "In-App Purchases";
+"REMOVE_ADS_PURCHASE_BUTTON_LABEL" = "Remove Ads";
+"REMOVE_ADS_LOADING_MESSAGE" = "Loading Remove Ads...";
+"ADS_REMOVED_MESSAGE" = "Ads Removed!";
+"SUPPORT_US_SECTION_HEADER" = "Support Us";
+"RESTORE_PURCHASES_BUTTON_LABEL" = "Restore Purchases";
+"PURCHASE_SUCCESS_MESSAGE" = "Purchase successful!";
+"RESTORE_SUCCESS_MESSAGE" = "Purchases restored successfully!";
+"PURCHASE_FAILED_MESSAGE" = "Purchase failed.";
+"PURCHASE_STATUS_TITLE" = "Purchase Status";
+"ALERT_BUTTON_OK" = "OK";
+
+// Support product titles (should match product names in App Store Connect)
+"Support Small" = "Support Small";
+"Support Medium" = "Support Medium";
+"Support Large" = "Support Large";

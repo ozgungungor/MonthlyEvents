@@ -8,7 +8,6 @@ class HolidayService: ObservableObject {
     private let eventStore = EKEventStore()
     @Published var hasCalendarAccess = false
     
-    // Kullanıcı tercihleri için AppStorage
     @AppStorage("isMondayHoliday") private var isMondayHoliday: Bool = false
     @AppStorage("isTuesdayHoliday") private var isTuesdayHoliday: Bool = false
     @AppStorage("isWednesdayHoliday") private var isWednesdayHoliday: Bool = false
@@ -19,14 +18,13 @@ class HolidayService: ObservableObject {
 
     @AppStorage("customHolidayKeywords") private var customHolidayKeywordsString: String = "bayram,tatil,resmi tatil,yılbaşı,ramazan,kurban,arefe,cumhuriyet,atatürk,zafer,çocuk,gençlik,spor,egemenlik,işçi,demokrasi,milli birlik,holiday,vacation,eid,festival"
 
-    // Anahtar kelimeler dizisi (computed property ile güncel kalır)
     private var holidayKeywords: [String] {
         customHolidayKeywordsString.lowercased().split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
     }
     
     private let debugFormatter: DateFormatter = {
         let df = DateFormatter()
-        df.dateFormat = "yyyy-MM-dd HH:mm:ss Z (EEEE)" // Gün adını da ekledim
+        df.dateFormat = "yyyy-MM-dd HH:mm:ss Z (EEEE)"
         df.locale = Locale(identifier: "tr_TR")
         return df
     }()
@@ -76,19 +74,18 @@ class HolidayService: ObservableObject {
         let normalizedDate = calendar.startOfDay(for: date)
         logger.debug("[IS_HOLIDAY] Kontrol edilen normalize edilmiş tarih: \(self.debugFormatter.string(from: normalizedDate))")
 
-        // Kullanıcının haftalık tatil tercihine göre kontrol
         if isUserDefinedWeekend(date: normalizedDate) {
             logger.debug("[IS_HOLIDAY] \(self.debugFormatter.string(from: normalizedDate)) -> Kullanıcı Tanımlı Hafta İçi Tatili: EVET")
             return true
         }
         
-        if isBasicTurkishHoliday(date: normalizedDate) { // Mevcut temel tatil listesi
+        if isBasicTurkishHoliday(date: normalizedDate) {
             logger.debug("[IS_HOLIDAY] \(self.debugFormatter.string(from: normalizedDate)) -> Temel Türk Tatili: EVET")
             return true
         }
 
         if hasCalendarAccess {
-            if isCalendarHoliday(date: normalizedDate) { // Kullanıcı takvimindeki etkinlikler
+            if isCalendarHoliday(date: normalizedDate) {
                 logger.debug("[IS_HOLIDAY] \(self.debugFormatter.string(from: normalizedDate)) -> Kullanıcı Takvim Tatili: EVET")
                 return true
             }
@@ -144,7 +141,7 @@ class HolidayService: ObservableObject {
     
     private func isHolidayKeyword(in title: String) -> Bool {
         let lowercasedTitle = title.lowercased()
-        for keyword in holidayKeywords { // Kullanıcının tanımladığı anahtar kelimeleri kullan
+        for keyword in holidayKeywords {
             if lowercasedTitle.contains(keyword) {
                 return true
             }
@@ -161,11 +158,14 @@ class HolidayService: ObservableObject {
             return false
         }
         
-        // Örnek 2024 Dini Bayramlar (Bu kısım dinamik bir API'den veya güncel bir listeden gelmeli)
+        // Bu bölümün her yıl güncellenmesi veya dinamik bir servise bağlanması gerekmektedir.
         let dynamicHolidays: [(month: Int, day: Int, year: Int)] = [
-            (4,10,2024), (4,11,2024), (4,12,2024), // Ramazan Bayramı
-            (6,15,2024), // Kurban Bayramı Arefe
-            (6,16,2024), (6,17,2024), (6,18,2024), (6,19,2024) // Kurban Bayramı
+            // 2024
+            (4,10,2024), (4,11,2024), (4,12,2024),
+            (6,15,2024), (6,16,2024), (6,17,2024), (6,18,2024), (6,19,2024),
+            // 2025
+            (3,30,2025), (3,31,2025), (4,1,2025),
+            (6,5,2025), (6,6,2025), (6,7,2025), (6,8,2025), (6,9,2025)
         ]
         
         if dynamicHolidays.contains(where: { $0.year == year && $0.month == month && $0.day == day }) {
@@ -174,13 +174,7 @@ class HolidayService: ObservableObject {
         }
 
         let fixedHolidays: [(month: Int, day: Int)] = [
-            (1, 1),  // Yılbaşı
-            (4, 23), // Ulusal Egemenlik ve Çocuk Bayramı
-            (5, 1),  // Emek ve Dayanışma Günü
-            (5, 19), // Atatürk'ü Anma, Gençlik ve Spor Bayramı
-            (7, 15), // Demokrasi ve Milli Birlik Günü
-            (8, 30), // Zafer Bayramı
-            (10, 29) // Cumhuriyet Bayramı (28 Ekim öğleden sonra, 29 Ekim tam gün)
+            (1, 1), (4, 23), (5, 1), (5, 19), (7, 15), (8, 30), (10, 29)
         ]
         
         if fixedHolidays.contains(where: { $0.month == month && $0.day == day }) {

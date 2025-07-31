@@ -1,146 +1,298 @@
 import SwiftUI
 
 struct CardFormView: View {
+    // MARK: - Environment & State
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.locale) var currentLocale
+    
     @ObservedObject var dataManager: CardDataManager
     @ObservedObject var holidayService: HolidayService
-    @Environment(\.locale) var currentLocale
-
     @State private var cardName: String
     @State private var lastFourDigits: String
     @State private var selectedDay: Int
     @State private var pickedColor: Color
     @State private var showingDeleteAlert = false
     @State private var paymentDueDaysOffset: Int
-
+    @State private var selectedPaymentType: PaymentType
+    @State private var totalLoanInstallments: Int
+    @State private var selectedBillingCycle: BillingCycle
+    @State private var selectedAnnualBillingMonth: Int
     let cardToEdit: CreditCard?
+    
+    // MARK: - Computed Properties
     private var mode: FormMode {
         cardToEdit == nil ? .add : .edit
     }
-
+    
+    private var isSaveButtonDisabled: Bool {
+        cardName.isEmpty || (selectedPaymentType == .card && lastFourDigits.count != 4)
+    }
+    
+    private var navigationTitle: LocalizedStringKey {
+        mode == .add ? "NAV_TITLE_ADD_ITEM" : "NAV_TITLE_EDIT_ITEM"
+    }
     enum FormMode {
         case add, edit
     }
-
+    // MARK: - Initializer
     init(dataManager: CardDataManager, holidayService: HolidayService, cardToEdit: CreditCard? = nil) {
         self.dataManager = dataManager
         self.holidayService = holidayService
         self.cardToEdit = cardToEdit
-
         _cardName = State(initialValue: cardToEdit?.name ?? "")
         _lastFourDigits = State(initialValue: cardToEdit?.lastFourDigits ?? "")
         _selectedDay = State(initialValue: cardToEdit?.dueDate ?? 1)
-
+        let initialType = cardToEdit?.type ?? .card
+        _selectedPaymentType = State(initialValue: initialType)
+        _paymentDueDaysOffset = State(initialValue: cardToEdit?.paymentDueDaysOffset ?? initialType.defaultPaymentDueDaysOffset)
+        
+        _totalLoanInstallments = State(initialValue: cardToEdit?.totalInstallments ?? 12)
+        _selectedBillingCycle = State(initialValue: cardToEdit?.billingCycle ?? .monthly)
+        _selectedAnnualBillingMonth = State(initialValue: cardToEdit?.annualBillingMonth ?? 1)
         let initialColorString = cardToEdit?.color ?? "blue"
         _pickedColor = State(initialValue: Self.colorFromString(initialColorString))
-        _paymentDueDaysOffset = State(initialValue: cardToEdit?.paymentDueDaysOffset ?? 10)
     }
-    
-    private func localizedString(_ key: String, locale: Locale, arguments: CVarArg...) -> String {
-        if let path = Bundle.main.path(forResource: locale.identifier, ofType: "lproj"),
-           let bundle = Bundle(path: path) {
-            let format = NSLocalizedString(key, bundle: bundle, comment: "")
-            return String(format: format, locale: Locale(identifier: locale.identifier), arguments: arguments)
-        }
-        return key
-    }
-
-    
+    // MARK: - Body
     var body: some View {
         NavigationView {
-            VStack {
-                Form {
-                    Section(LocalizedStringKey("SECTION_CARD_INFO")) {
-                        TextField(LocalizedStringKey("TEXTFIELD_CARD_NAME_PLACEHOLDER"), text: $cardName)
-
-                        if #available(iOS 17.0, *) {
-                            TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
-                                .keyboardType(.numberPad)
-                                .onChange(of: lastFourDigits) { newValue, _ in
-                                    let filtered = newValue.filter { "0123456789".contains($0) }
-                                    lastFourDigits = String(filtered.prefix(4))
-                                }
-                        } else if #available(iOS 15.0, *) {
-                            TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
-                                .keyboardType(.numberPad)
-                                .onChange(of: lastFourDigits) { newValue in
-                                    let filtered = newValue.filter { "0123456789".contains($0) }
-                                    lastFourDigits = String(filtered.prefix(4))
-                                }
-                        } else {
-                            TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
-                                .keyboardType(.numberPad)
+            Form {
+                generalInfoSection
+                paymentDetailsSection // <-- BU BÖLÜM DEĞİŞTİRİLDİ
+                settingsSection
+            }
+            .navigationTitle(navigationTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(LocalizedStringKey("SAVE")) {
+                        saveItem()
+                    }
+                    .disabled(isSaveButtonDisabled)
+                    .fontWeight(.semibold)
+                }
+            }
+            .alert(Text(LocalizedStringKey("ALERT_TITLE_DELETE_ITEM")), isPresented: $showingDeleteAlert) {
+                alertButtons
+            } message: {
+                alertMessage
+            }
+            // Klavye otomatik gizleme için bu modifier'ı değiştiriyoruz
+            .scrollDismissesKeyboard(.immediately) // BURAYI DEĞİŞTİRDİK
+            // Beyaz "glitch"i azaltmak için Form'a arka plan rengi ekliyoruz (bu satır orijinal kodunuzda var)
+            .background(Color(.systemGray6))
+            .onTapGesture {
+                // Herhangi bir yere dokunulduğunda klavyeyi gizle (bu satır da orijinal kodunuzda var)
+                self.hideKeyboard()
+            }
+        }
+        // NavigationView stilini belirtmek, arka planın düzgün çalışmasına yardımcı olabilir (bu satır orijinal kodunuzda var)
+        .navigationViewStyle(.stack)
+    }
+}
+// MARK: - Subviews
+private extension CardFormView {
+    
+    /// Genel bilgilerin (tür, isim, son 4 hane) girildiği bölüm.
+    var generalInfoSection: some View {
+        Section(LocalizedStringKey("SECTION_GENERAL_INFO")) {
+            Picker(LocalizedStringKey("PICKER_PAYMENT_TYPE_LABEL"), selection: $selectedPaymentType) {
+                ForEach(PaymentType.allCases) { type in
+                    Text(LocalizedStringKey(type.localizationKey)).tag(type)
+                }
+            }
+            .pickerStyle(.segmented)
+            .onChange(of: selectedPaymentType) { newType in
+                paymentDueDaysOffset = newType.defaultPaymentDueDaysOffset
+                if newType == .subscription {
+                    selectedBillingCycle = .monthly
+                }
+            }
+            TextField(LocalizedStringKey("TEXTFIELD_ITEM_NAME_PLACEHOLDER"), text: $cardName)
+            if selectedPaymentType == .card {
+                TextField(LocalizedStringKey("TEXTFIELD_LAST_FOUR_DIGITS_PLACEHOLDER"), text: $lastFourDigits)
+                    .keyboardType(.numberPad)
+                    .onChange(of: lastFourDigits) { newValue in
+                        let filtered = newValue.filter { "0123456789".contains($0) }
+                        lastFourDigits = String(filtered.prefix(4))
+                    }
+            }
+        }
+    }
+    
+    /// Ödeme detaylarının (gün, offset, taksit) girildiği bölüm. (DEĞİŞTİRİLMİŞ VERSİYON)
+    var paymentDetailsSection: some View {
+        Section(LocalizedStringKey("SECTION_PAYMENT_DETAILS")) {
+            VStack(alignment: .leading) {
+                Text(LocalizedStringKey("PICKER_DAY_OF_MONTH_LABEL"))
+                    .font(.headline)
+                Picker("", selection: $selectedDay) {
+                    ForEach(1...31, id: \.self) { day in
+                        Text("\(day)").tag(day)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .frame(height: 150)
+                .padding(.horizontal, 40) // <-- DEĞİŞİKLİK
+            }
+            
+            if selectedPaymentType == .card {
+                VStack(alignment: .leading) {
+                    Text(LocalizedStringKey("STEPPER_PAYMENT_DUE_OFFSET_LABEL"))
+                        .font(.headline)
+                    Picker("", selection: $paymentDueDaysOffset) {
+                        ForEach(0...30, id: \.self) { offset in
+                            Text("\(offset)").tag(offset)
                         }
                     }
-
-                    Section(LocalizedStringKey("SECTION_ACCOUNT_CUTOFF")) {
-                        Picker(LocalizedStringKey("PICKER_DAY_OF_MONTH_LABEL"), selection: $selectedDay) {
-                            ForEach(1...31, id: \.self) { day in
-                                Text(String(format: NSLocalizedString("DAY_TAG_FORMAT", comment: ""), day)).tag(day)
+                    .pickerStyle(.wheel)
+                    .frame(height: 100)
+                    .padding(.horizontal, 40) // <-- DEĞİŞİKLİK
+                }
+            }
+            if selectedPaymentType == .loan {
+                VStack(alignment: .leading) {
+                    Text(LocalizedStringKey("STEPPER_LOAN_INSTALLMENTS_LABEL"))
+                        .font(.headline)
+                    Picker("", selection: $totalLoanInstallments) {
+                        ForEach(1...60, id: \.self) { installment in
+                            Text("\(installment)").tag(installment)
+                        }
+                    }
+                    .pickerStyle(.wheel)
+                    .frame(height: 100)
+                    .padding(.horizontal, 40) // <-- DEĞİŞİKLİK
+                }
+            }
+            if selectedPaymentType == .subscription {
+                Picker(LocalizedStringKey("PICKER_BILLING_CYCLE_LABEL"), selection: $selectedBillingCycle) {
+                    ForEach(BillingCycle.allCases) { cycle in
+                        Text(LocalizedStringKey(cycle.localizationKey)).tag(cycle)
+                    }
+                }
+                .pickerStyle(.segmented)
+                if selectedBillingCycle == .annually {
+                    VStack(alignment: .leading) {
+                        Text(LocalizedStringKey("STEPPER_ANNUAL_BILLING_MONTH_LABEL"))
+                            .font(.headline)
+                        Picker("", selection: $selectedAnnualBillingMonth) {
+                            ForEach(1...12, id: \.self) { month in
+                                Text(localizedMonthName(month: month, locale: currentLocale)).tag(month)
                             }
                         }
                         .pickerStyle(.wheel)
-                        .frame(height: 150)
-
-                        Stepper(
-                            localizedString("STEPPER_PAYMENT_DUE_OFFSET_LABEL", locale: currentLocale, arguments: paymentDueDaysOffset),
-                            value: $paymentDueDaysOffset,
-                            in: 1...30
-                        )
-
-                    }
-
-                    Section(LocalizedStringKey("SECTION_CARD_COLOR")) {
-                        ColorPicker(LocalizedStringKey("COLORPICKER_SELECT_COLOR_LABEL"), selection: $pickedColor, supportsOpacity: false)
-                    }
-
-                    if mode == .edit {
-                        Section {
-                            Button(LocalizedStringKey("BUTTON_DELETE_CARD"), role: .destructive) {
-                                showingDeleteAlert = true
-                            }
-                        }
+                        .frame(height: 100)
+                        .padding(.horizontal, 40) // <-- DEĞİŞİKLİK
                     }
                 }
-
-                HStack(spacing: 20) {
-                    Button(LocalizedStringKey("CANCEL")) {
-                        dismiss()
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.gray.opacity(0.2))
-                    .cornerRadius(8)
-                    .foregroundColor(.primary)
-
-                    Button(LocalizedStringKey("SAVE")) {
-                        saveCard()
-                    }
-                    .disabled(cardName.isEmpty || lastFourDigits.count != 4)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background((cardName.isEmpty || lastFourDigits.count != 4) ? Color.gray.opacity(0.5) : Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-                }
-                .padding()
-            }
-            .navigationTitle(mode == .add ? LocalizedStringKey("NAV_TITLE_ADD_CARD") : LocalizedStringKey("NAV_TITLE_EDIT_CARD"))
-            .navigationBarTitleDisplayMode(.inline)
-            .alert(LocalizedStringKey("ALERT_TITLE_DELETE_CARD"), isPresented: $showingDeleteAlert, presenting: cardToEdit) { card in
-                Button(LocalizedStringKey("BUTTON_DELETE_CARD"), role: .destructive) {
-                    if let indexSet = indexSet(for: card) {
-                        dataManager.deleteCard(at: indexSet)
-                    }
-                    dismiss()
-                }
-                Button(LocalizedStringKey("CANCEL"), role: .cancel) {}
-            } message: { _ in
-                Text(LocalizedStringKey("ALERT_MESSAGE_DELETE_CARD_CONFIRMATION"))
             }
         }
     }
-
+    
+    /// Renk seçimi ve silme butonu gibi ayarları içeren bölüm.
+    var settingsSection: some View {
+        Group {
+            Section(LocalizedStringKey("SECTION_ITEM_COLOR")) {
+                ColorPicker(LocalizedStringKey("COLORPICKER_SELECT_COLOR_LABEL"), selection: $pickedColor, supportsOpacity: false)
+            }
+            if mode == .edit {
+                Section {
+                    Button(LocalizedStringKey("BUTTON_DELETE_ITEM"), role: .destructive) {
+                        showingDeleteAlert = true
+                    }
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var alertButtons: some View {
+        Button(role: .destructive) {
+            if let itemToDelete = cardToEdit {
+                dataManager.delete(card: itemToDelete)
+                dismiss()
+            }
+        } label: {
+            Text(LocalizedStringKey("BUTTON_DELETE_ITEM"))
+        }
+        
+        Button(role: .cancel) { } label: {
+            Text(LocalizedStringKey("CANCEL"))
+        }
+    }
+    
+    var alertMessage: some View {
+        Text(LocalizedStringKey("ALERT_MESSAGE_DELETE_ITEM_CONFIRMATION"))
+    }
+}
+// MARK: - Logic & Helper Functions
+private extension CardFormView {
+    
+    func saveItem() {
+        let colorString = colorToHexString(pickedColor)
+        
+        if var card = cardToEdit { // Edit Mode
+            card.name = cardName
+            card.lastFourDigits = lastFourDigits
+            card.dueDate = selectedDay
+            card.paymentDueDaysOffset = paymentDueDaysOffset
+            card.color = colorString
+            
+            if card.type != selectedPaymentType { // Tip değiştiyse tüm ilgili alanları sıfırla/ayarla
+                card.type = selectedPaymentType
+                card.totalInstallments = nil
+                card.remainingInstallments = nil
+                card.creationDate = nil
+                card.billingCycle = nil
+                card.annualBillingMonth = nil
+                if selectedPaymentType == .loan {
+                    card.totalInstallments = totalLoanInstallments
+                    card.remainingInstallments = totalLoanInstallments
+                    card.creationDate = Date()
+                } else if selectedPaymentType == .subscription {
+                    card.billingCycle = selectedBillingCycle
+                    card.annualBillingMonth = selectedBillingCycle == .annually ? selectedAnnualBillingMonth : nil
+                }
+            } else { // Tip değişmediyse mevcut alanları güncelle
+                if selectedPaymentType == .loan {
+                    let oldTotal = card.totalInstallments ?? 0
+                    let oldRemaining = card.remainingInstallments ?? 0
+                    let paymentsMade = oldTotal - oldRemaining
+                    
+                    card.totalInstallments = totalLoanInstallments
+                    card.remainingInstallments = max(0, totalLoanInstallments - paymentsMade)
+                } else if selectedPaymentType == .subscription {
+                    card.billingCycle = selectedBillingCycle
+                    card.annualBillingMonth = selectedBillingCycle == .annually ? selectedAnnualBillingMonth : nil
+                }
+            }
+            
+            dataManager.updateCard(card)
+            
+        } else { // Add Mode
+            var newCard = CreditCard(
+                name: cardName,
+                lastFourDigits: selectedPaymentType == .card ? lastFourDigits : "",
+                dueDate: selectedDay,
+                paymentDueDaysOffset: paymentDueDaysOffset,
+                color: colorString,
+                type: selectedPaymentType
+            )
+            
+            if selectedPaymentType == .loan {
+                newCard.totalInstallments = totalLoanInstallments
+                newCard.remainingInstallments = totalLoanInstallments
+                newCard.creationDate = Date()
+            } else if selectedPaymentType == .subscription {
+                newCard.billingCycle = selectedBillingCycle
+                newCard.annualBillingMonth = selectedBillingCycle == .annually ? selectedAnnualBillingMonth : nil
+            }
+            
+            dataManager.addCard(newCard)
+        }
+        
+        dismiss()
+    }
+    
     static func colorFromString(_ nameOrHex: String) -> Color {
         if nameOrHex.hasPrefix("#") {
             let hex = nameOrHex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
@@ -165,49 +317,25 @@ struct CardFormView: View {
             }
         }
     }
-
-    private func colorToHexString(_ color: Color) -> String {
+    func colorToHexString(_ color: Color) -> String {
         let uiColor = UIColor(color)
-        var r: CGFloat = 0
-        var g: CGFloat = 0
-        var b: CGFloat = 0
-        var a: CGFloat = 0
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
         uiColor.getRed(&r, green: &g, blue: &b, alpha: &a)
         return String(format: "#%02X%02X%02X", Int(r*255), Int(g*255), Int(b*255))
     }
-
-    private func indexSet(for card: CreditCard) -> IndexSet? {
-        if let index = dataManager.cards.firstIndex(where: { $0.id == card.id }) {
-            return IndexSet(integer: index)
+    private func localizedMonthName(month: Int, locale: Locale) -> String {
+        let calendar = Calendar.current
+        var components = DateComponents()
+        components.month = month
+        if let date = calendar.date(from: components) {
+            let dateFormatter = DateFormatter()
+            dateFormatter.locale = locale
+            dateFormatter.dateFormat = "MMMM" // Ayın tam adı
+            return dateFormatter.string(from: date)
         }
-        return nil
+        return ""
     }
-
-    private func saveCard() {
-        let colorString = colorToHexString(pickedColor)
-
-        let card = CreditCard(
-            id: cardToEdit?.id ?? UUID(),
-            name: cardName,
-            lastFourDigits: lastFourDigits,
-            dueDate: selectedDay,
-            paymentDueDaysOffset: paymentDueDaysOffset,
-            isActive: true,
-            color: colorString
-        )
-
-        if mode == .add {
-            dataManager.addCard(card)
-        } else {
-            dataManager.updateCard(card)
-        }
-
-        let dueDates = DueDateCalculator.calculateDueDates(for: card, using: holidayService)
-        guard let nextDueDate = dueDates.first else {
-            dismiss()
-            return
-        }
-        NotificationManager.shared.scheduleReminder(for: card, dueDate: nextDueDate)
-        dismiss()
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }

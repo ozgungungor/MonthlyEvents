@@ -1,30 +1,35 @@
 import SwiftUI
 import UserNotifications
 import EventKit
+import AppTrackingTransparency
+import AdSupport
 
 struct MainView: View {
+    // MARK: - Properties
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.locale) var currentLocale // Mevcut locale'i al
+    @Environment(\.locale) var currentLocale
 
     @StateObject private var dataManager = CardDataManager.shared
     @StateObject private var holidayService = HolidayService.shared
 
     @State private var showingAddCardSheet = false
+    @State private var showingSettingsSheet = false
     @State private var showingPermissionAlert = false
     @State private var permissionAlertMessage = ""
     @State private var openedCardID: String? = nil
-    @State private var showingSettingsSheet = false
 
-    @State private var navigationViewID = UUID() // 👈 NavigationView’i yeniden oluşturmak için ID
+    @State private var navigationViewID = UUID()
 
-    private var basePermissionMessageText: String { NSLocalizedString("PERMISSION_ALERT_BASE_MESSAGE", comment: "") }
-    private var permMsgNotificationsDeniedDetail: String { NSLocalizedString("PERM_MSG_NOTIF_DENIED_DETAIL", comment: "") }
-    private var permMsgNotificationsNotDeterminedDetail: String { NSLocalizedString("PERM_MSG_NOTIF_NOT_DETERMINED_DETAIL", comment: "") }
-    private var permMsgCalendarDeniedDetailFullAccess: String { NSLocalizedString("PERM_MSG_CALENDAR_DENIED_DETAIL_FULL_ACCESS", comment: "") }
-    private var permMsgCalendarNotObtainedFullAccess: String { NSLocalizedString("PERM_MSG_CALENDAR_NOT_OBTAINED_FULL_ACCESS", comment: "") }
-    private var manageInSettingsText: String { NSLocalizedString("PERMISSION_ALERT_MANAGE_IN_SETTINGS", comment: "") }
+    // MARK: - Computed Properties
+    private var groupedCards: [(PaymentType, [CreditCard])] {
+        let grouped = Dictionary(grouping: dataManager.cards, by: { $0.type })
+        return grouped.sorted { $0.key.rawValue < $1.key.rawValue }
+    }
 
+    // MARK: - Body
     var body: some View {
+        // BannerView ve onu çevreleyen ZStack(alignment: .bottom) kaldırıldı.
+        // Artık MainView doğrudan NavigationView ile başlayacak.
         NavigationView {
             ZStack {
                 LinearGradient(
@@ -34,71 +39,13 @@ struct MainView: View {
                 ).ignoresSafeArea()
 
                 if dataManager.cards.isEmpty {
-                    VStack(spacing: 20) {
-                        Image(systemName: "creditcard.trianglebadge.exclamationmark")
-                            .font(.system(size: 70))
-                            .foregroundColor(.gray.opacity(0.7))
-                        Text(LocalizedStringKey("EMPTY_STATE_TITLE"))
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                        Text(LocalizedStringKey("EMPTY_STATE_MESSAGE"))
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                        Button(LocalizedStringKey("EMPTY_STATE_ADD_CARD_BUTTON")) {
-                            showingAddCardSheet = true
-                        }
-                        .padding()
-                        .background(Color.accentColor)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                    }
-                    .padding()
+                    emptyStateView
                 } else {
-                    List {
-                        Section {
-                            HStack {
-                                Image(systemName: holidayService.hasCalendarAccess ? "calendar.circle.fill" : "calendar.circle")
-                                    .foregroundColor(holidayService.hasCalendarAccess ? .green : .orange)
-                                Text(holidayService.hasCalendarAccess ?
-                                     LocalizedStringKey("CALENDAR_ACCESS_GRANTED") :
-                                     LocalizedStringKey("CALENDAR_ACCESS_DENIED"))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-
-                        ForEach(dataManager.cards) { card in
-                            NavigationLink(
-                                destination: CardFormView(dataManager: dataManager, holidayService: holidayService, cardToEdit: card),
-                                tag: card.id.uuidString,
-                                selection: $openedCardID
-                            ) {
-                                CardRowView(card: card, holidayService: holidayService)
-                            }
-                        }
-                        .onDelete(perform: dataManager.deleteCard)
-                    }
-                    .listStyle(.insetGrouped)
-                    .background(Color.clear)
-                    .scrollContentBackground(.hidden)
+                    cardListView
                 }
             }
             .navigationTitle(LocalizedStringKey("MY_CARDS_TITLE"))
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        Button { showingAddCardSheet = true } label: {
-                            Label(LocalizedStringKey("ADD_CARD_ACCESSIBILITY_LABEL"), systemImage: "plus.circle.fill")
-                        }
-                        Button { showingSettingsSheet = true } label: {
-                            Label(LocalizedStringKey("SETTINGS_GEAR_ACCESSIBILITY_LABEL"), systemImage: "gearshape.fill")
-                        }
-                    }
-                    .font(.title2)
-                }
-            }
+            .toolbar { mainToolbar }
             .sheet(isPresented: $showingAddCardSheet) {
                 CardFormView(dataManager: dataManager, holidayService: holidayService)
             }
@@ -106,93 +53,195 @@ struct MainView: View {
                 SettingsView()
             }
             .alert(LocalizedStringKey("ALERT_PERMISSION_REQUIRED_TITLE"), isPresented: $showingPermissionAlert) {
-                Button(LocalizedStringKey("ALERT_BUTTON_GO_TO_SETTINGS")) {
-                    if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(settingsUrl)
-                    }
-                }
-                Button(LocalizedStringKey("ALERT_BUTTON_OK"), role: .cancel) {}
+                permissionAlertButtons
             } message: {
                 Text(permissionAlertMessage)
             }
-            .task {
-                UIApplication.shared.applicationIconBadgeNumber = 0
-                UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-                await checkAndRequestPermissions()
-                await rescheduleAllNotifications()
+            .onAppear(perform: onInitialLoad)
+            .onChange(of: scenePhase, perform: handleScenePhaseChange)
+            .onChange(of: currentLocale) { newLocale in
+                handleLocaleChange(newLocale: newLocale)
             }
-            .onChange(of: scenePhase) { newPhase in
-                if newPhase == .active {
-                    UIApplication.shared.applicationIconBadgeNumber = 0
-                    UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-                    holidayService.refresh()
-                    Task {
-                        await rescheduleAllNotifications()
+            .onReceive(NotificationCenter.default.publisher(for: .openCardNotification)) { handleOpenCardNotification($0) }
+        }
+        .id(navigationViewID)
+        // ignoresSafeArea(.keyboard, edges: .bottom) da buradan kaldırıldı, çünkü artık PaynifyApp'in en üst seviyesinde yönetiliyor.
+    }
+}
+
+// MARK: - Subviews
+private extension MainView {
+    
+    var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "creditcard.trianglebadge.exclamationmark")
+                .font(.system(size: 70))
+                .foregroundColor(.gray.opacity(0.7))
+            
+            Text(LocalizedStringKey("EMPTY_STATE_TITLE_ITEM"))
+                .font(.title2)
+                .fontWeight(.semibold)
+            
+            Text(LocalizedStringKey("EMPTY_STATE_MESSAGE_ITEM"))
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+            
+            Button(LocalizedStringKey("EMPTY_STATE_ADD_ITEM_BUTTON")) {
+                showingAddCardSheet = true
+            }
+            .padding()
+            .background(Color.accentColor)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+        }
+        .padding()
+    }
+    
+    var cardListView: some View {
+        List {
+            calendarAccessStatusSection
+            
+            ForEach(groupedCards, id: \.0) { type, cardsInGroup in
+                Section(header: Text(type.groupHeader)) {
+                    ForEach(cardsInGroup) { card in
+                        NavigationLink(
+                            destination: CardFormView(dataManager: dataManager, holidayService: holidayService, cardToEdit: card),
+                            tag: card.id.uuidString,
+                            selection: $openedCardID
+                        ) {
+                            CardRowView(card: card, holidayService: holidayService)
+                        }
+                    }
+                    .onDelete { indexSet in
+                        dataManager.delete(in: cardsInGroup, at: indexSet)
                     }
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OpenCard"))) { notification in
-                if let cardID = notification.object as? String {
-                    openedCardID = cardID
-                }
+        }
+        .listStyle(.insetGrouped)
+        .background(Color.clear)
+        .scrollContentBackground(.hidden)
+    }
+
+    var calendarAccessStatusSection: some View {
+        Section {
+            HStack {
+                Image(systemName: holidayService.hasCalendarAccess ? "calendar.circle.fill" : "calendar.circle")
+                    .foregroundColor(holidayService.hasCalendarAccess ? .green : .orange)
+                Text(holidayService.hasCalendarAccess ?
+                    LocalizedStringKey("CALENDAR_ACCESS_GRANTED") :
+                    LocalizedStringKey("CALENDAR_ACCESS_DENIED"))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
         }
-        .id(navigationViewID) // 👈 View yeniden oluşturulsun
-        .onChange(of: currentLocale) { _ in
+    }
+
+    var mainToolbar: some ToolbarContent {
+        ToolbarItem(placement: .navigationBarTrailing) {
+            HStack {
+                Button { showingAddCardSheet = true } label: {
+                    Label(LocalizedStringKey("ADD_ITEM_ACCESSIBILITY_LABEL"), systemImage: "plus.circle.fill")
+                }
+                Button { showingSettingsSheet = true } label: {
+                    Label(LocalizedStringKey("SETTINGS_GEAR_ACCESSIBILITY_LABEL"), systemImage: "gearshape.fill")
+                }
+            }
+            .font(.title2)
+        }
+    }
+    
+    @ViewBuilder
+    var permissionAlertButtons: some View {
+        Button(LocalizedStringKey("ALERT_BUTTON_GO_TO_SETTINGS")) {
+            if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(settingsUrl)
+            }
+        }
+        Button(LocalizedStringKey("ALERT_BUTTON_OK"), role: .cancel) {}
+    }
+}
+
+// MARK: - Methods & Event Handlers
+private extension MainView {
+
+    func onInitialLoad() {
+        dataManager.updateInstallmentsAndSubscriptions()
+        holidayService.refresh()
+        UIApplication.shared.applicationIconBadgeNumber = 0
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+        NotificationManager.shared.updateAppBadgeCount()
+        
+        requestAppTrackingPermissionIfNeeded()
+    }
+    
+    func handleScenePhaseChange(newPhase: ScenePhase) {
+        if newPhase == .active {
+            onInitialLoad()
+            CalendarManager.shared.resetAndCreateNewCalendar(for: currentLocale)
             holidayService.refresh()
-            Task {
-                await rescheduleAllNotifications()
-                await checkAndRequestPermissions()
-            }
-            navigationViewID = UUID() // 👈 NavigationView’i sıfırla
+            rescheduleAllEventsAndNotifications(for: currentLocale)
+            NotificationManager.shared.updateAppBadgeCount()
         }
     }
-
-    private func checkAndRequestPermissions() async {
-        let _ = await NotificationManager.shared.requestPermission()
-        await holidayService.requestCalendarAccess()
-
-        var messagesForAlert: [String] = []
-
-        let notificationSettings = await UNUserNotificationCenter.current().notificationSettings()
-        if notificationSettings.authorizationStatus == .denied {
-            messagesForAlert.append("• \(permMsgNotificationsDeniedDetail)")
-        } else if notificationSettings.authorizationStatus == .notDetermined {
-            messagesForAlert.append("• \(permMsgNotificationsNotDeterminedDetail)")
+    
+    func handleLocaleChange(newLocale: Locale) {
+        navigationViewID = UUID()
+        
+        Task {
+            CalendarManager.shared.resetAndCreateNewCalendar(for: newLocale)
+            holidayService.refresh()
+            rescheduleAllEventsAndNotifications(for: newLocale)
         }
-
-        if !holidayService.hasCalendarAccess {
-            let calendarStatus = EKEventStore.authorizationStatus(for: .event)
-            if #available(iOS 17.0, *) {
-                if calendarStatus == .denied || calendarStatus == .restricted || calendarStatus == .writeOnly {
-                    messagesForAlert.append("• \(permMsgCalendarDeniedDetailFullAccess)")
-                } else {
-                    messagesForAlert.append("• \(permMsgCalendarNotObtainedFullAccess)")
+    }
+    
+    private func rescheduleAllEventsAndNotifications(for locale: Locale) {
+        Task {
+            let hasCalendarAccess = await CalendarManager.shared.requestAccessIfNeeded()
+            let hasNotificationAccess = await NotificationManager.shared.requestPermission()
+            
+            for card in dataManager.cards {
+                let dueDates = DueDateCalculator.calculateDueDates(for: card, using: holidayService)
+                
+                if hasCalendarAccess {
+                    CalendarManager.shared.addOrUpdateEvents(for: card, dueDates: dueDates, holidayService: holidayService, locale: locale)
                 }
-            } else {
-                messagesForAlert.append("• \(permMsgCalendarDeniedDetailFullAccess)")
-            }
-        }
-
-        if !messagesForAlert.isEmpty {
-            await MainActor.run {
-                self.permissionAlertMessage = "\(basePermissionMessageText)\n\n" +
-                                              messagesForAlert.joined(separator: "\n\n") +
-                                              "\n\n\(manageInSettingsText)"
-                self.showingPermissionAlert = true
+                
+                if hasNotificationAccess {
+                    NotificationManager.shared.scheduleReminders(for: card, dueDates: dueDates, locale: locale)
+                }
             }
         }
     }
+    
+    func handleOpenCardNotification(_ notification: Notification) {
+        if let cardID = notification.userInfo?["cardID"] as? String {
+            openedCardID = cardID
+        }
+    }
 
-    private func rescheduleAllNotifications() async {
-        let today = Date()
-        for card in dataManager.cards {
-            let dueDates = DueDateCalculator.calculateDueDates(for: card, referenceDate: today, using: holidayService)
-            NotificationManager.shared.removeReminders(for: card)
-            for (index, dueDate) in dueDates.enumerated() {
-                let suffix = index == 0 ? "thisMonth" : (index == 1 ? "nextMonth" : "futureMonth\(index+1)")
-                NotificationManager.shared.scheduleReminder(for: card, dueDate: dueDate, idSuffix: suffix)
+    func requestAppTrackingPermissionIfNeeded() {
+        if #available(iOS 14, *) {
+            ATTrackingManager.requestTrackingAuthorization { status in
+                switch status {
+                case .authorized:
+                    print("✅ Kullanıcı takip izni verdi")
+                case .denied:
+                    print("❌ Kullanıcı takip iznini reddetti")
+                case .notDetermined:
+                    print("❓ Kullanıcı henüz karar vermedi")
+                case .restricted:
+                    print("⚠️ Kısıtlanmış")
+                @unknown default:
+                    break
+                }
             }
         }
     }
+}
+
+extension Notification.Name {
+    static let openCardNotification = Notification.Name("OpenCard")
 }
