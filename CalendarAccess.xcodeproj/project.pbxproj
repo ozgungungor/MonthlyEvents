@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		0D169E762DEB135F00752449 /* CalendarManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D169E752DEB135200752449 /* CalendarManager.swift */; };
+		0D30CC7F2E3CAD4A005A8875 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D30CC7E2E3CAD4A005A8875 /* AppDelegate.swift */; };
+		0D30CC912E3CB907005A8875 /* Model.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 0D30CC8F2E3CB907005A8875 /* Model.xcdatamodeld */; };
+		0D30CC972E3CE10F005A8875 /* CloudKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D30CC962E3CE107005A8875 /* CloudKitManager.swift */; };
 		0D4C3C192DEF90DD00D63E1A /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4C3C182DEF90D800D63E1A /* SettingsView.swift */; };
 		0D4C3C202DEF966F00D63E1A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 0D4C3C1E2DEF966F00D63E1A /* Localizable.strings */; };
 		0D54A00A2DE2F5C900DF28A3 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A0092DE2F5BF00DF28A3 /* MainView.swift */; };
@@ -18,11 +21,9 @@
 		0D54A0142DE2F75A00DF28A3 /* HolidayService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A0132DE2F75400DF28A3 /* HolidayService.swift */; };
 		0D54A0162DE2F7B300DF28A3 /* DueDateCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A0152DE2F7AC00DF28A3 /* DueDateCalculator.swift */; };
 		0D54A0182DE2F9F400DF28A3 /* CardRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A0172DE2F9EF00DF28A3 /* CardRowView.swift */; };
-		0D54A0202DE3271E00DF28A3 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D54A01F2DE3271400DF28A3 /* AppDelegate.swift */; };
 		0DF2C81E2E2A2CBB00D19E03 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = 0DF2C81D2E2A2CBB00D19E03 /* GoogleMobileAds */; };
 		0DF2C8202E2A2D4800D19E03 /* BannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF2C81F2E2A2D3E00D19E03 /* BannerView.swift */; };
 		0DF2C8232E3B9F6500D19E03 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0DF2C8222E3B9F6500D19E03 /* StoreKit.framework */; };
-		0DF2C8252E3B9F7B00D19E03 /* IAPManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF2C8242E3B9F7900D19E03 /* IAPManager.swift */; };
 		EB3F2B7229FC93500089E32B /* PaynifyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB3F2B7129FC93500089E32B /* PaynifyApp.swift */; };
 		EB3F2B7629FC93510089E32B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB3F2B7529FC93510089E32B /* Assets.xcassets */; };
 		EB3F2B7929FC93510089E32B /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EB3F2B7829FC93510089E32B /* Preview Assets.xcassets */; };
@@ -30,6 +31,9 @@
 
 /* Begin PBXFileReference section */
 		0D169E752DEB135200752449 /* CalendarManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarManager.swift; sourceTree = "<group>"; };
+		0D30CC7E2E3CAD4A005A8875 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		0D30CC902E3CB907005A8875 /* Model.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Model.xcdatamodel; sourceTree = "<group>"; };
+		0D30CC962E3CE107005A8875 /* CloudKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitManager.swift; sourceTree = "<group>"; };
 		0D4C3C182DEF90D800D63E1A /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		0D4C3C1F2DEF966F00D63E1A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		0D4C3C212DF0BE0400D63E1A /* tr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = tr; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -41,10 +45,9 @@
 		0D54A0132DE2F75400DF28A3 /* HolidayService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayService.swift; sourceTree = "<group>"; };
 		0D54A0152DE2F7AC00DF28A3 /* DueDateCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DueDateCalculator.swift; sourceTree = "<group>"; };
 		0D54A0172DE2F9EF00DF28A3 /* CardRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardRowView.swift; sourceTree = "<group>"; };
-		0D54A01F2DE3271400DF28A3 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0DF2C81F2E2A2D3E00D19E03 /* BannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BannerView.swift; sourceTree = "<group>"; };
 		0DF2C8222E3B9F6500D19E03 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk/System/Library/Frameworks/StoreKit.framework; sourceTree = DEVELOPER_DIR; };
-		0DF2C8242E3B9F7900D19E03 /* IAPManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IAPManager.swift; sourceTree = "<group>"; };
+		0DF2C8262E3BCEC300D19E03 /* PaynifyDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = PaynifyDebug.entitlements; sourceTree = "<group>"; };
 		81A54031805BB342741C155A /* SampleCode.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = SampleCode.xcconfig; path = ../Configuration/SampleCode.xcconfig; sourceTree = "<group>"; };
 		EB3F2B6F29FC93500089E32B /* Paynify.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Paynify.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB3F2B7129FC93500089E32B /* PaynifyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaynifyApp.swift; sourceTree = "<group>"; };
@@ -101,6 +104,7 @@
 				EB3F2B7529FC93510089E32B /* Assets.xcassets */,
 				EB3F2B7729FC93510089E32B /* Preview Content */,
 				5AEC51FE0014E3DC0000749A /* Configuration */,
+				0D30CC8F2E3CB907005A8875 /* Model.xcdatamodeld */,
 			);
 			path = MonthlyEvents;
 			sourceTree = "<group>";
@@ -116,11 +120,11 @@
 		EB3F2B7E29FC944F0089E32B /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				0DF2C8242E3B9F7900D19E03 /* IAPManager.swift */,
+				0D30CC962E3CE107005A8875 /* CloudKitManager.swift */,
+				0D30CC7E2E3CAD4A005A8875 /* AppDelegate.swift */,
 				0DF2C81F2E2A2D3E00D19E03 /* BannerView.swift */,
 				0D4C3C182DEF90D800D63E1A /* SettingsView.swift */,
 				0D169E752DEB135200752449 /* CalendarManager.swift */,
-				0D54A01F2DE3271400DF28A3 /* AppDelegate.swift */,
 				0D54A0172DE2F9EF00DF28A3 /* CardRowView.swift */,
 				0D54A0152DE2F7AC00DF28A3 /* DueDateCalculator.swift */,
 				0D54A0132DE2F75400DF28A3 /* HolidayService.swift */,
@@ -136,6 +140,7 @@
 		EB6B9BAE29FC860700EA1B38 = {
 			isa = PBXGroup;
 			children = (
+				0DF2C8262E3BCEC300D19E03 /* PaynifyDebug.entitlements */,
 				EB3F2B7029FC93500089E32B /* MonthlyEvents */,
 				EBC88DC829FC868F00302532 /* Products */,
 				4A1721DD48244303BD993F54 /* LICENSE */,
@@ -227,11 +232,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0DF2C8252E3B9F7B00D19E03 /* IAPManager.swift in Sources */,
 				0D54A0162DE2F7B300DF28A3 /* DueDateCalculator.swift in Sources */,
+				0D30CC7F2E3CAD4A005A8875 /* AppDelegate.swift in Sources */,
 				0D54A0122DE2F72700DF28A3 /* NotificationManager.swift in Sources */,
+				0D30CC912E3CB907005A8875 /* Model.xcdatamodeld in Sources */,
 				0D169E762DEB135F00752449 /* CalendarManager.swift in Sources */,
-				0D54A0202DE3271E00DF28A3 /* AppDelegate.swift in Sources */,
 				0D54A0102DE2F6FF00DF28A3 /* CreditCard.swift in Sources */,
 				0D54A0142DE2F75A00DF28A3 /* HolidayService.swift in Sources */,
 				0D54A00E2DE2F6CD00DF28A3 /* CardDataManager.swift in Sources */,
@@ -241,6 +246,7 @@
 				EB3F2B7229FC93500089E32B /* PaynifyApp.swift in Sources */,
 				0DF2C8202E2A2D4800D19E03 /* BannerView.swift in Sources */,
 				0D4C3C192DEF90DD00D63E1A /* SettingsView.swift in Sources */,
+				0D30CC972E3CE10F005A8875 /* CloudKitManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,9 +302,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = PaynifyDebug.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"MonthlyEvents/Preview Content\"";
 				DEVELOPMENT_TEAM = RBRWPSRQSR;
@@ -323,6 +330,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MonthlyEvents/Info.plist;
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Fetch events in all your calendars and delete the ones you select in the app.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "Uygulama, size özel reklamlar gösterebilmek için izninizi talep eder.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -334,7 +342,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -393,7 +401,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = "\"MonthlyEvents/Preview Content\"";
 				DEVELOPMENT_TEAM = RBRWPSRQSR;
@@ -412,6 +420,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MonthlyEvents/Info.plist;
 				INFOPLIST_KEY_NSCalendarsUsageDescription = "Fetch events in all your calendars and delete the ones you select in the app.";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "Uygulama, size özel reklamlar gösterebilmek için izninizi talep eder.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -423,7 +432,7 @@
 					"@executable_path/Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ozgungungor.Paynify;
@@ -506,6 +515,19 @@
 			productName = GoogleMobileAds;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		0D30CC8F2E3CB907005A8875 /* Model.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				0D30CC902E3CB907005A8875 /* Model.xcdatamodel */,
+			);
+			currentVersion = 0D30CC902E3CB907005A8875 /* Model.xcdatamodel */;
+			path = Model.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = EB6B9BAF29FC860700EA1B38 /* Project object */;
 }

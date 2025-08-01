@@ -1,12 +1,3 @@
-//
-//  AppDelegate 2.swift
-//  Paynify
-//
-//  Created by özgün güngör on 1.08.2025.
-//  Copyright © 2025 Apple. All rights reserved.
-//
-
-
 import UIKit
 import UserNotifications
 import Foundation

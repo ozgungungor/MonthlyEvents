@@ -8,29 +8,89 @@ class CardDataManager: ObservableObject {
 
     private init() {
         loadCards()
+        // Uygulama her açıldığında veya aktif olduğunda bekleyen işlemleri senkronize et.
+        synchronizeWithCloudKit()
     }
+    
+    // MARK: - Senkronizasyon Mantığı
+
+    private func synchronizeWithCloudKit() {
+        // Önce bekleyen silme işlemlerini gönder
+        synchronizePendingDeletions()
+        
+        Task {
+            // Aktif (silinmemiş) kartları kontrol et
+            let activeCards = self.cards.filter { !$0.isDeleted }
+            
+            // Eğer aktif yerel kart yoksa, CloudKit'ten veri çek.
+            if activeCards.isEmpty {
+                print("Aktif yerel kart yok. CloudKit'ten veri çekiliyor...")
+                let fetchedCards = await CloudKitManager.shared.fetchCards()
+                
+                await MainActor.run {
+                    self.cards = fetchedCards
+                    self.saveCards()
+                    self.rescheduleAllEventsAndNotifications()
+                    print("Veriler CloudKit'ten yenilendi.")
+                }
+            }
+            // Eğer yerel depolamada veri varsa, CloudKit'in durumunu kontrol et.
+            else {
+                let cloudHasRecords = await CloudKitManager.shared.hasRecords()
+                
+                // Eğer CloudKit boşsa, yerel verileri CloudKit'e yükle.
+                if !cloudHasRecords {
+                    print("Lokalde veri var ama CloudKit boş. Lokal veriler CloudKit'e aktarılıyor...")
+                    for card in activeCards { // Sadece aktif kartları gönder
+                        CloudKitManager.shared.save(card: card)
+                    }
+                } else {
+                    print("Hem lokalde hem de CloudKit'te veri mevcut. Senkronizasyon tamamlandı.")
+                }
+            }
+        }
+    }
+    
+    /// Beklemedeki silme işlemlerini CloudKit ile senkronize eder.
+    func synchronizePendingDeletions() {
+        let pendingDeletions = cards.filter { $0.isDeleted }
+        guard !pendingDeletions.isEmpty else { return }
+        
+        print("\(pendingDeletions.count) adet bekleyen silme işlemi senkronize ediliyor...")
+        
+        for cardToDelete in pendingDeletions {
+            CloudKitManager.shared.delete(cardID: cardToDelete.id) { [weak self] success in
+                if success {
+                    DispatchQueue.main.async {
+                        self?.purgeDeletedCard(withId: cardToDelete.id)
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Veri Yönetimi
 
     private func loadCards() {
         if let data = UserDefaults.standard.data(forKey: cardsKey) {
-            let decoder = JSONDecoder()
-            if let decodedCards = try? decoder.decode([CreditCard].self, from: data) {
-                cards = decodedCards
+            if let decodedCards = try? JSONDecoder().decode([CreditCard].self, from: data) {
+                self.cards = decodedCards
             }
         }
     }
 
     private func saveCards() {
-        let encoder = JSONEncoder()
-        if let encoded = try? encoder.encode(cards) {
+        if let encoded = try? JSONEncoder().encode(cards) {
             UserDefaults.standard.set(encoded, forKey: cardsKey)
         }
     }
-
+    
     // MARK: - Public API
-
+    
     func addCard(_ card: CreditCard) {
         cards.append(card)
         saveCards()
+        CloudKitManager.shared.save(card: card)
         rescheduleAllEventsAndNotifications()
         forceReload()
     }
@@ -39,85 +99,77 @@ class CardDataManager: ObservableObject {
         guard let index = cards.firstIndex(where: { $0.id == card.id }) else { return }
         cards[index] = card
         saveCards()
+        CloudKitManager.shared.update(card: card)
         rescheduleAllEventsAndNotifications()
         forceReload()
     }
     
-    /// Tek bir öğeyi siler. Örneğin, düzenleme ekranındaki silme butonu için kullanılır.
+    // MARK: - Silme Mantığı
+    
     func delete(card: CreditCard) {
-        performDeletion(for: card)
+        performSoftDeletion(for: card)
     }
 
-    /// Gruplanmış bir listeden, `.onDelete` ile gelen IndexSet'e göre öğeleri siler.
     func delete(in group: [CreditCard], at offsets: IndexSet) {
         let cardsToDelete = offsets.map { group[$0] }
         for card in cardsToDelete {
-            performDeletion(for: card)
+            performSoftDeletion(for: card)
         }
     }
     
-    // MARK: - Private Deletion Logic
-
-    private func performDeletion(for card: CreditCard) {
-        // 1. Öğeyi ana veri dizisinden kaldır.
-        cards.removeAll(where: { $0.id == card.id })
+    private func performSoftDeletion(for card: CreditCard) {
+        guard let index = cards.firstIndex(where: { $0.id == card.id }) else { return }
         
-        // 2. Değişiklikleri kaydet.
+        cards[index].isDeleted = true
+        print("Kart (\(card.name)) yerel olarak silinmek üzere işaretlendi.")
         saveCards()
-        
-        // 3. Değişiklik sonrası TÜM etkinlik ve bildirimleri yeniden planla.
-        rescheduleAllEventsAndNotifications()
-        
-        // 4. Arayüzü güncelle.
+        synchronizePendingDeletions()
         forceReload()
     }
-
-    // MARK: - Central Rescheduling Logic (GÜNCELLENDİ)
-
-    /// Takvimi ve tüm bildirimleri tamamen sıfırlar ve mevcut kartlara göre yeniden oluşturur.
+    
+    private func purgeDeletedCard(withId cardID: UUID) {
+        print("Kart (\(cardID)) sunucudan silindi, yerelden kalıcı olarak temizleniyor.")
+        cards.removeAll(where: { $0.id == cardID })
+        saveCards()
+        forceReload()
+    }
+    
+    // MARK: - Central Rescheduling Logic
+    
     func rescheduleAllEventsAndNotifications() {
         Task {
             let hasCalendarAccess = await CalendarManager.shared.requestAccessIfNeeded()
             let hasNotificationAccess = await NotificationManager.shared.requestPermission()
             
-            // Çeviriler için doğru 'locale' bilgisini al (takvim adı için gerekli)
             let languageIdentifier = UserDefaults.standard.string(forKey: "appLanguage") ?? Locale.current.identifier
             let locale = Locale(identifier: languageIdentifier)
             
-            // 1. ADIM: "Hard Reset" - Takvimi ve tüm planları temizle
             if hasCalendarAccess {
-                // Takvimin kendisini silip yeniden oluşturur
                 CalendarManager.shared.resetAndCreateNewCalendar(for: locale)
             }
             if hasNotificationAccess {
-                // Planlanmış tüm bildirimleri iptal eder
                 NotificationManager.shared.removeAllScheduledNotifications()
             }
             
             let holidayService = HolidayService.shared
 
-            // 2. ADIM: Mevcut kart listesine göre her şeyi yeniden oluştur
-            for card in cards where card.isActive {
+            for card in cards where card.isActive && !card.isDeleted { // Sadece aktif ve silinmemiş kartlar
                 let dueDates = DueDateCalculator.calculateDueDates(for: card, using: holidayService)
                 
                 if hasCalendarAccess {
-                    // Etkinlikleri yeni oluşturulan takvime ekler
                     CalendarManager.shared.addOrUpdateEvents(for: card, dueDates: dueDates, holidayService: holidayService, locale: locale)
                 }
                 
                 if hasNotificationAccess {
-                    // Bildirimleri yeniden planlar
                     NotificationManager.shared.scheduleReminders(for: card, dueDates: dueDates, locale: locale)
                 }
             }
-            
             print("Takvim ve bildirimler 'hard reset' yöntemiyle yeniden planlandı.")
         }
     }
-
+    
     // MARK: - Other Functions
     
-    // GÜNCELLENDİ: Hem kredi taksitlerini hem de abonelikleri güncellemek için daha genel bir ad
     func updateInstallmentsAndSubscriptions() {
         var needsSave = false
         let calendar = Calendar.current
@@ -126,7 +178,6 @@ class CardDataManager: ObservableObject {
         let updatedCards = cards.map { card -> CreditCard in
             var mutableCard = card
             
-            // Kredi taksitlerini güncelleme mantığı
             if mutableCard.type == .loan,
                let creationDate = mutableCard.creationDate,
                let totalInstallments = mutableCard.totalInstallments {
@@ -134,32 +185,22 @@ class CardDataManager: ObservableObject {
                 var paymentsMade = 0
                 var dateCursor = creationDate
                 
-                // Kredi başlangıç ayının ilk gününü al
                 var initialLoanCheckDateComponents = calendar.dateComponents([.year, .month], from: creationDate)
-                initialLoanCheckDateComponents.day = mutableCard.dueDate // Kredi ödeme gününü ayarla
+                initialLoanCheckDateComponents.day = mutableCard.dueDate
                 guard let loanStartPaymentDate = calendar.date(from: initialLoanCheckDateComponents) else { return card }
 
-                // Kredi başlangıç ayının ödeme günü, oluşturulma tarihinden sonraysa ilk taksiti sayma
                 if creationDate <= loanStartPaymentDate {
-                    // Eğer oluşum tarihi ödeme gününden önce veya ödeme günü ile aynıysa, ilk ödeme dönemi bu ay başlar
-                    paymentsMade = 0 // Henüz ödeme yapılmamış varsay
+                    paymentsMade = 0
                 } else {
-                    // Eğer oluşum tarihi ödeme gününden sonra ise, bu ayın taksitini ödenmiş varsayabiliriz (veya bir sonraki aydan başlar)
-                    // Bu senaryo için başlangıçta 0 taksit ödenmiş kabul ediyoruz, döngü ilerideki ayları kontrol edecek.
                     paymentsMade = 0
                 }
 
-                // Oluşturulma tarihinden bugüne kadar olan ayları döngüye al
                 while dateCursor < today {
                     var dueDateComponents = calendar.dateComponents([.year, .month], from: dateCursor)
-                    dueDateComponents.day = mutableCard.dueDate // Ödeme gününü ayın ilgili gününe ayarla
+                    dueDateComponents.day = mutableCard.dueDate
                     
                     if let paymentDate = calendar.date(from: dueDateComponents) {
-                        // Eğer ödeme tarihi bugünden önce veya bugün ise VE o ayın ödeme günü oluşturulma tarihinden büyükse say.
-                        // Bu, özellikle oluşturulma tarihinden sonraki ilk ödeme gününü doğru saymak için önemli.
                         if paymentDate <= today {
-                             // İlk taksit için özel kontrol: Oluşturulma tarihinden sonraki ilk ödeme gününü dikkate al.
-                             // dateCursor'ın bulunduğu ayın ödeme günü oluşum tarihinden sonra ise saymaya başla.
                             if paymentDate >= creationDate {
                                 paymentsMade += 1
                             }
@@ -170,7 +211,6 @@ class CardDataManager: ObservableObject {
                     dateCursor = nextMonth
                 }
                 
-                // paymentsMade, taksit sayısını aştıysa sıfırla
                 let newRemaining = max(0, totalInstallments - paymentsMade)
                 if mutableCard.remainingInstallments != newRemaining {
                     mutableCard.remainingInstallments = newRemaining

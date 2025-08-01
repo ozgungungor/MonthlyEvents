@@ -21,15 +21,17 @@ struct MainView: View {
     @State private var navigationViewID = UUID()
 
     // MARK: - Computed Properties
+    private var activeCards: [CreditCard] {
+        dataManager.cards.filter { !$0.isDeleted }
+    }
+
     private var groupedCards: [(PaymentType, [CreditCard])] {
-        let grouped = Dictionary(grouping: dataManager.cards, by: { $0.type })
+        let grouped = Dictionary(grouping: activeCards, by: { $0.type })
         return grouped.sorted { $0.key.rawValue < $1.key.rawValue }
     }
 
     // MARK: - Body
     var body: some View {
-        // BannerView ve onu çevreleyen ZStack(alignment: .bottom) kaldırıldı.
-        // Artık MainView doğrudan NavigationView ile başlayacak.
         NavigationView {
             ZStack {
                 LinearGradient(
@@ -38,7 +40,7 @@ struct MainView: View {
                     endPoint: .bottomTrailing
                 ).ignoresSafeArea()
 
-                if dataManager.cards.isEmpty {
+                if activeCards.isEmpty {
                     emptyStateView
                 } else {
                     cardListView
@@ -65,7 +67,6 @@ struct MainView: View {
             .onReceive(NotificationCenter.default.publisher(for: .openCardNotification)) { handleOpenCardNotification($0) }
         }
         .id(navigationViewID)
-        // ignoresSafeArea(.keyboard, edges: .bottom) da buradan kaldırıldı, çünkü artık PaynifyApp'in en üst seviyesinde yönetiliyor.
     }
 }
 
@@ -115,7 +116,10 @@ private extension MainView {
                         }
                     }
                     .onDelete { indexSet in
-                        dataManager.delete(in: cardsInGroup, at: indexSet)
+                        let cardsToDelete = indexSet.map { cardsInGroup[$0] }
+                        for card in cardsToDelete {
+                            dataManager.delete(card: card)
+                        }
                     }
                 }
             }
@@ -179,6 +183,8 @@ private extension MainView {
     
     func handleScenePhaseChange(newPhase: ScenePhase) {
         if newPhase == .active {
+            // Uygulama tekrar aktif olduğunda bekleyen işlemleri senkronize et
+            dataManager.synchronizePendingDeletions()
             onInitialLoad()
             CalendarManager.shared.resetAndCreateNewCalendar(for: currentLocale)
             holidayService.refresh()
@@ -202,7 +208,8 @@ private extension MainView {
             let hasCalendarAccess = await CalendarManager.shared.requestAccessIfNeeded()
             let hasNotificationAccess = await NotificationManager.shared.requestPermission()
             
-            for card in dataManager.cards {
+            // Sadece aktif ve silinmemiş kartları kullan
+            for card in activeCards {
                 let dueDates = DueDateCalculator.calculateDueDates(for: card, using: holidayService)
                 
                 if hasCalendarAccess {

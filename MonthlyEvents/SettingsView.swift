@@ -2,10 +2,10 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) var dismiss
-    @Environment(\.locale) var locale // Ortamdaki güncel dil bilgisini almak için kullanışlı
 
-    @AppStorage("appLanguage") var currentLanguage: String = Locale.preferredLanguages.first?.components(separatedBy: "-").first ?? "en"
-
+    // UI'daki anlık değişiklikleri tutmak için @State değişkenleri.
+    // Bunlar, "Kaydet" butonuna basılana kadar asıl veriyi etkilemez.
+    @State private var tempSelectedLanguage: String
     @State private var tempIsMondayHoliday: Bool
     @State private var tempIsTuesdayHoliday: Bool
     @State private var tempIsWednesdayHoliday: Bool
@@ -14,18 +14,6 @@ struct SettingsView: View {
     @State private var tempIsSaturdayHoliday: Bool
     @State private var tempIsSundayHoliday: Bool
     @State private var tempCustomHolidayKeywords: String
-    @State private var tempSelectedLanguage: String
-
-    // Bu AppStorage'lar doğrudan UI tarafından değil, temp değişkenler aracılığıyla güncelleniyor.
-    // Init bloğu ve Save butonu bu bağlantıyı kurar.
-    @AppStorage("isMondayHoliday") private var isMondayHoliday: Bool = false
-    @AppStorage("isTuesdayHoliday") private var isTuesdayHoliday: Bool = false
-    @AppStorage("isWednesdayHoliday") private var isWednesdayHoliday: Bool = false
-    @AppStorage("isThursdayHoliday") private var isThursdayHoliday: Bool = false
-    @AppStorage("isFridayHoliday") private var isFridayHoliday: Bool = false
-    @AppStorage("isSaturdayHoliday") private var isSaturdayHoliday: Bool = true
-    @AppStorage("isSundayHoliday") private var isSundayHoliday: Bool = true
-    @AppStorage("customHolidayKeywords") private var customHolidayKeywords: String = "bayram,tatil,resmi tatil,yılbaşı,ramazan,kurban,arefe,cumhuriyet,atatürk,zafer,çocuk,gençlik,spor,egemenlik,işçi,demokrasi,milli birlik,holiday,vacation,eid,festival"
 
     let supportedLanguages = [
         Language(code: "en", nameKey: "ENGLISH"),
@@ -39,16 +27,17 @@ struct SettingsView: View {
     }
 
     init() {
-        // AppStorage'dan okunan başlangıç değerlerini temp değişkenlere atama
+        // View oluşturulurken, @State değişkenlerini UserDefaults'taki son kaydedilmiş
+        // değerlerle doldur. Bu, CloudKit'ten veri gelene kadar ekranın boş kalmamasını sağlar.
+        _tempSelectedLanguage = State(initialValue: UserDefaults.standard.string(forKey: "appLanguage") ?? "en")
         _tempIsMondayHoliday = State(initialValue: UserDefaults.standard.bool(forKey: "isMondayHoliday"))
         _tempIsTuesdayHoliday = State(initialValue: UserDefaults.standard.bool(forKey: "isTuesdayHoliday"))
         _tempIsWednesdayHoliday = State(initialValue: UserDefaults.standard.bool(forKey: "isWednesdayHoliday"))
         _tempIsThursdayHoliday = State(initialValue: UserDefaults.standard.bool(forKey: "isThursdayHoliday"))
         _tempIsFridayHoliday = State(initialValue: UserDefaults.standard.bool(forKey: "isFridayHoliday"))
-        _tempIsSaturdayHoliday = State(initialValue: UserDefaults.standard.bool(forKey: "isSaturdayHoliday"))
-        _tempIsSundayHoliday = State(initialValue: UserDefaults.standard.bool(forKey: "isSundayHoliday"))
+        _tempIsSaturdayHoliday = State(initialValue: UserDefaults.standard.object(forKey: "isSaturdayHoliday") as? Bool ?? true)
+        _tempIsSundayHoliday = State(initialValue: UserDefaults.standard.object(forKey: "isSundayHoliday") as? Bool ?? true)
         _tempCustomHolidayKeywords = State(initialValue: UserDefaults.standard.string(forKey: "customHolidayKeywords") ?? "bayram,tatil,resmi tatil,yılbaşı,ramazan,kurban,arefe,cumhuriyet,atatürk,zafer,çocuk,gençlik,spor,egemenlik,işçi,demokrasi,milli birlik,holiday,vacation,eid,festival")
-        _tempSelectedLanguage = State(initialValue: UserDefaults.standard.string(forKey: "appLanguage") ?? Locale.preferredLanguages.first?.components(separatedBy: "-").first ?? "en")
     }
 
     var body: some View {
@@ -59,16 +48,6 @@ struct SettingsView: View {
                         ForEach(supportedLanguages, id: \.code) { lang in
                             Text(LocalizedStringKey(lang.nameKey)).tag(lang.code)
                         }
-                    }
-                    // Dil değiştiğinde anında applyChanges'i tetikle
-                    .onChange(of: tempSelectedLanguage) { newLanguage in
-                        // currentLanguage'i anında güncelleyerek MainView'daki onChange'i tetikleyebiliriz.
-                        // Ancak AppStorage'ın güncellenmesi biraz zaman alabilir.
-                        // En garanti yol, kaydet butonunda tüm değişiklikleri tek seferde uygulamaktır.
-                        // Ancak Picker'ın görsel olarak güncellenmesi için burada bir değişiklik yapılabilir.
-                        // currentLanguage = newLanguage // Eğer anında uygulansın isteniyorsa bu satır eklenebilir.
-                        // Bu durumda MainView'daki onChange(of: currentLocale) devreye girer.
-                        // Fakat burada sadece temp değeri güncellendiği için, save'e basınca değişmesi daha mantıklı.
                     }
                 }
 
@@ -101,44 +80,70 @@ struct SettingsView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(LocalizedStringKey("SAVE")) {
-                        // Temp değişkenlerdeki değerleri @AppStorage değişkenlerine kaydet
-                        currentLanguage = tempSelectedLanguage // Dil ayarını kaydet
-                        
-                        isMondayHoliday = tempIsMondayHoliday
-                        isTuesdayHoliday = tempIsTuesdayHoliday
-                        isWednesdayHoliday = tempIsWednesdayHoliday
-                        isThursdayHoliday = tempIsThursdayHoliday
-                        isFridayHoliday = tempIsFridayHoliday
-                        isSaturdayHoliday = tempIsSaturdayHoliday
-                        isSundayHoliday = tempIsSundayHoliday
-                        customHolidayKeywords = tempCustomHolidayKeywords
-                        
-                        // Tüm servisleri güncellemeleri için bilgilendir
-                        // HolidayService'ı yenile
-                        HolidayService.shared.refresh()
-                        // Tüm kartlar için takvim etkinliklerini ve bildirimleri yeniden planla
-                        // Bu, tatil günü ayarlarındaki değişiklikleri dikkate alacaktır.
-                        CardDataManager.shared.rescheduleAllEventsAndNotifications()
-                        
+                        saveSettings()
                         dismiss()
                     }
                 }
             }
             .onAppear {
-                // SettingsView açıldığında, AppStorage'daki güncel değerleri temp değişkenlere yükle
-                // Bu init'te zaten yapılıyor ama onAppear'da tekrar kontrol etmek veya emin olmak isteyebilirsiniz
-                // (init bir kere çağrılır, onAppear her görünüm oluştuğunda/göründüğünde)
-                tempSelectedLanguage = currentLanguage // Picker'ın doğru başlangıç değerini göstermesi için
-                tempIsMondayHoliday = isMondayHoliday
-                tempIsTuesdayHoliday = isTuesdayHoliday
-                tempIsWednesdayHoliday = isWednesdayHoliday
-                tempIsThursdayHoliday = isThursdayHoliday
-                tempIsFridayHoliday = isFridayHoliday
-                tempIsSaturdayHoliday = isSaturdayHoliday
-                tempIsSundayHoliday = isSundayHoliday
-                tempCustomHolidayKeywords = customHolidayKeywords
+                // View göründüğünde, en güncel ayarları CloudKit'ten çek.
+                fetchSettingsFromCloudKit()
             }
         }
+    }
+    
+    /// Ayarları CloudKit'ten çeker ve UI'ı günceller.
+    private func fetchSettingsFromCloudKit() {
+        CloudKitManager.shared.fetchSettings { fetchedSettings in
+            // Eğer CloudKit'ten ayar gelmezse, mevcut (UserDefaults'tan yüklenmiş) ayarları kullanmaya devam et.
+            guard let settings = fetchedSettings else { return }
+            
+            // Gelen verilerle @State değişkenlerini ana thread'de güncelle.
+            DispatchQueue.main.async {
+                self.tempSelectedLanguage = settings["appLanguage"] as? String ?? self.tempSelectedLanguage
+                self.tempIsMondayHoliday = settings["isMondayHoliday"] as? Bool ?? self.tempIsMondayHoliday
+                self.tempIsTuesdayHoliday = settings["isTuesdayHoliday"] as? Bool ?? self.tempIsTuesdayHoliday
+                self.tempIsWednesdayHoliday = settings["isWednesdayHoliday"] as? Bool ?? self.tempIsWednesdayHoliday
+                self.tempIsThursdayHoliday = settings["isThursdayHoliday"] as? Bool ?? self.tempIsThursdayHoliday
+                self.tempIsFridayHoliday = settings["isFridayHoliday"] as? Bool ?? self.tempIsFridayHoliday
+                self.tempIsSaturdayHoliday = settings["isSaturdayHoliday"] as? Bool ?? self.tempIsSaturdayHoliday
+                self.tempIsSundayHoliday = settings["isSundayHoliday"] as? Bool ?? self.tempIsSundayHoliday
+                self.tempCustomHolidayKeywords = settings["customHolidayKeywords"] as? String ?? self.tempCustomHolidayKeywords
+            }
+        }
+    }
+    
+    /// Ayarları hem yerel olarak (UserDefaults) hem de buluta (CloudKit) kaydeder.
+    private func saveSettings() {
+        // 1. Yerel UserDefaults'ı güncelle (çevrimdışı önbellek için)
+        UserDefaults.standard.set(tempSelectedLanguage, forKey: "appLanguage")
+        UserDefaults.standard.set(tempIsMondayHoliday, forKey: "isMondayHoliday")
+        UserDefaults.standard.set(tempIsTuesdayHoliday, forKey: "isTuesdayHoliday")
+        UserDefaults.standard.set(tempIsWednesdayHoliday, forKey: "isWednesdayHoliday")
+        UserDefaults.standard.set(tempIsThursdayHoliday, forKey: "isThursdayHoliday")
+        UserDefaults.standard.set(tempIsFridayHoliday, forKey: "isFridayHoliday")
+        UserDefaults.standard.set(tempIsSaturdayHoliday, forKey: "isSaturdayHoliday")
+        UserDefaults.standard.set(tempIsSundayHoliday, forKey: "isSundayHoliday")
+        UserDefaults.standard.set(tempCustomHolidayKeywords, forKey: "customHolidayKeywords")
+        
+        // 2. CloudKit'e kaydetmek için bir sözlük oluştur
+        var settingsDict: [String: Any] = [:]
+        settingsDict["appLanguage"] = tempSelectedLanguage
+        settingsDict["isMondayHoliday"] = tempIsMondayHoliday
+        settingsDict["isTuesdayHoliday"] = tempIsTuesdayHoliday
+        settingsDict["isWednesdayHoliday"] = tempIsWednesdayHoliday
+        settingsDict["isThursdayHoliday"] = tempIsThursdayHoliday
+        settingsDict["isFridayHoliday"] = tempIsFridayHoliday
+        settingsDict["isSaturdayHoliday"] = tempIsSaturdayHoliday
+        settingsDict["isSundayHoliday"] = tempIsSundayHoliday
+        settingsDict["customHolidayKeywords"] = tempCustomHolidayKeywords
+        
+        // 3. CloudKitManager aracılığıyla buluta kaydet
+        CloudKitManager.shared.saveSettings(settings: settingsDict)
+        
+        // 4. Diğer servisleri güncellenmiş ayarlarla yeniden yapılandır
+        HolidayService.shared.refresh()
+        CardDataManager.shared.rescheduleAllEventsAndNotifications()
     }
 }
 
@@ -146,8 +151,5 @@ struct SettingsView: View {
 struct SettingsView_Previews: PreviewProvider {
     static var previews: some View {
         SettingsView()
-            .environment(\.locale, .init(identifier: "tr")) // Türkçe preview
-        SettingsView()
-            .environment(\.locale, .init(identifier: "en")) // İngilizce preview
     }
 }
