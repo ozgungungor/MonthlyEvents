@@ -18,8 +18,9 @@ class CalendarManager {
 
     // MARK: - Calendar Management
 
+    // 1. ADIM: Takvim başlığını yerelleştirme yerine sabit olarak "Paynify" yapıyoruz.
     private var calendarTitle: String {
-        NSLocalizedString("CALENDAR_TITLE", comment: "The name for the calendar created by the app")
+        return "Paynify" // GÜNCELLENDİ
     }
 
     private var calendar: EKCalendar? {
@@ -33,8 +34,9 @@ class CalendarManager {
             return foundCalendar
         }
 
-        let possibleTitles = ["Payment Reminders", "Ödeme Hatırlatmaları", "App Payments", "Paynify"]
-        if let existingCalendar = eventStore.calendars(for: .event).first(where: { possibleTitles.contains($0.title) }) {
+        // 2. ADIM: Birden çok olası başlık yerine sadece "Paynify" adında bir takvim arıyoruz.
+        // Not: Eski isimleri de bulup silmesi için reset fonksiyonundaki liste kalabilir.
+        if let existingCalendar = eventStore.calendars(for: .event).first(where: { $0.title == self.calendarTitle }) { // GÜNCELLENDİ
             UserDefaults.standard.set(existingCalendar.calendarIdentifier, forKey: calendarIdentifierKey)
             self.appCalendar = existingCalendar
             return existingCalendar
@@ -53,6 +55,7 @@ class CalendarManager {
     public func resetAndCreateNewCalendar(for locale: Locale) {
         logger.warning("Starting a hard reset of calendars. ALL EVENTS in related calendars will be DELETED.")
         
+        // Bu liste eski sürümlerden kalma takvimleri bulup silmek için geniş tutulabilir.
         let possibleTitles = ["Payment Reminders", "Ödeme Hatırlatmaları", "App Payments", "Paynify"]
         var calendarsToDelete: [EKCalendar] = []
         let allCalendars = eventStore.calendars(for: .event)
@@ -79,7 +82,8 @@ class CalendarManager {
         self.appCalendar = nil // Önbelleği temizle
         logger.info("Finished hard reset. Old identifier cleared.")
         
-        let newTitle = localizedString(forKey: "CALENDAR_TITLE", locale: locale)
+        // 3. ADIM: Sıfırlama sonrası yeni takvim oluşturulurken, dil ayarından bağımsız olarak "Paynify" adını kullan.
+        let newTitle = self.calendarTitle // GÜNCELLENDİ
         _ = self.createCalendar(withTitle: newTitle)
     }
 

@@ -32,7 +32,7 @@ struct DueDateCalculator {
             
             // Abonelikler için doğrudan ham tarihleri kullanacağız, kaydırma yapmayacağız.
             // Sadece ilk ödeme tarihi bugünse iki tarih döndürelim, değilse sadece bir tarih.
-            var finalSubscriptionDates = rawDueDates.sorted()
+            let finalSubscriptionDates = rawDueDates.sorted()
             if finalSubscriptionDates.first.map({ calendar.isDate($0, inSameDayAs: today) }) == true && finalSubscriptionDates.count > 1 {
                 return Array(finalSubscriptionDates.prefix(2))
             } else if let firstDate = finalSubscriptionDates.first {

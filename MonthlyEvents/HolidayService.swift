@@ -8,6 +8,7 @@ class HolidayService: ObservableObject {
     private let eventStore = EKEventStore()
     @Published var hasCalendarAccess = false
     
+    // Kullanıcının ayarladığı hafta sonu günleri
     @AppStorage("isMondayHoliday") private var isMondayHoliday: Bool = false
     @AppStorage("isTuesdayHoliday") private var isTuesdayHoliday: Bool = false
     @AppStorage("isWednesdayHoliday") private var isWednesdayHoliday: Bool = false
@@ -16,7 +17,12 @@ class HolidayService: ObservableObject {
     @AppStorage("isSaturdayHoliday") private var isSaturdayHoliday: Bool = true
     @AppStorage("isSundayHoliday") private var isSundayHoliday: Bool = true
 
+    // Tatil olarak kabul edilecek anahtar kelimeler
     @AppStorage("customHolidayKeywords") private var customHolidayKeywordsString: String = "bayram,tatil,resmi tatil,yılbaşı,ramazan,kurban,arefe,cumhuriyet,atatürk,zafer,çocuk,gençlik,spor,egemenlik,işçi,demokrasi,milli birlik,holiday,vacation,eid,festival"
+
+    // Seçilen takvimlerin ID'lerini saklamak için @AppStorage
+    // Dizi doğrudan saklanamadığı için JSON olarak kodlayıp saklayacağız.
+    @AppStorage("selectedCalendarIDs") private var selectedCalendarIDsJSON: String = ""
 
     private var holidayKeywords: [String] {
         customHolidayKeywordsString.lowercased().split(separator: ",").map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
@@ -69,74 +75,115 @@ class HolidayService: ObservableObject {
         return granted
     }
     
-    private func isHoliday(date: Date) -> Bool {
-        let calendar = Calendar.current
-        let normalizedDate = calendar.startOfDay(for: date)
-        logger.debug("[IS_HOLIDAY] Kontrol edilen normalize edilmiş tarih: \(self.debugFormatter.string(from: normalizedDate))")
-
-        if isUserDefinedWeekend(date: normalizedDate) {
-            logger.debug("[IS_HOLIDAY] \(self.debugFormatter.string(from: normalizedDate)) -> Kullanıcı Tanımlı Hafta İçi Tatili: EVET")
-            return true
-        }
-        
-        if isBasicTurkishHoliday(date: normalizedDate) {
-            logger.debug("[IS_HOLIDAY] \(self.debugFormatter.string(from: normalizedDate)) -> Temel Türk Tatili: EVET")
-            return true
-        }
-
-        if hasCalendarAccess {
-            if isCalendarHoliday(date: normalizedDate) {
-                logger.debug("[IS_HOLIDAY] \(self.debugFormatter.string(from: normalizedDate)) -> Kullanıcı Takvim Tatili: EVET")
-                return true
-            }
-        } else {
-            logger.debug("[IS_HOLIDAY] Takvim erişimi yok, isCalendarHoliday atlandı.")
-        }
-        
-        logger.debug("[IS_HOLIDAY] \(self.debugFormatter.string(from: normalizedDate)) -> Tatil Değil.")
-        return false
+    // MARK: - Calendar Management
+    
+    /// Cihazdaki tüm takvim kaynaklarını döndürür. Ayarlar ekranında kullanılmak üzere.
+    func getAvailableCalendars() -> [EKCalendar] {
+        guard hasCalendarAccess else { return [] }
+        return eventStore.calendars(for: .event)
     }
-
-    private func isUserDefinedWeekend(date: Date) -> Bool {
-        let calendar = Calendar.current
-        let weekday = calendar.component(.weekday, from: date) // 1=Pazar, 2=Pazartesi, ..., 7=Cumartesi
-
-        switch weekday {
-        case 1: return isSundayHoliday
-        case 2: return isMondayHoliday
-        case 3: return isTuesdayHoliday
-        case 4: return isWednesdayHoliday
-        case 5: return isThursdayHoliday
-        case 6: return isFridayHoliday
-        case 7: return isSaturdayHoliday
-        default: return false
+    
+    /// Kullanıcının seçtiği takvim ID'lerini kaydeder.
+    func saveSelectedCalendarIDs(_ ids: [String]) {
+        if let data = try? JSONEncoder().encode(ids), let jsonString = String(data: data, encoding: .utf8) {
+            selectedCalendarIDsJSON = jsonString
+            logger.info("Seçilen takvim ID'leri kaydedildi.")
+            // Seçim değiştiğinde arayüzü yenilemek için sinyal gönder
+            self.refresh()
         }
     }
     
-    private func isCalendarHoliday(date: Date) -> Bool {
+    /// Kaydedilmiş takvim ID'lerini yükler.
+    func loadSelectedCalendarIDs() -> [String] {
+        if let data = selectedCalendarIDsJSON.data(using: .utf8),
+           let ids = try? JSONDecoder().decode([String].self, from: data) {
+            return ids
+        }
+        // Eğer hiç seçim yapılmamışsa, tüm takvimleri varsayılan olarak seçili yap.
+        let allCalendarIDs = getAvailableCalendars().map { $0.calendarIdentifier }
+        // Başlangıçta kaydetmek için save'i çağır
+        if !allCalendarIDs.isEmpty && selectedCalendarIDsJSON.isEmpty {
+           saveSelectedCalendarIDs(allCalendarIDs)
+        }
+        return allCalendarIDs
+    }
+    
+    // MARK: - Holiday Calculation Logic
+
+    /// Bir tarihin neden tatil olduğunu (eğer tatilse) string olarak döndürür.
+    private func getHolidayReason(for date: Date) -> String? {
+        let normalizedDate = Calendar.current.startOfDay(for: date)
+        
+        // 1. Kullanıcının ayarladığı hafta sonu günlerini kontrol et
+        if let weekendReason = getUserDefinedWeekendReason(date: normalizedDate) {
+            return "Kullanıcı tanımlı hafta sonu: \(weekendReason)"
+        }
+        
+        // 2. Takvim etkinliklerini kontrol et (eğer erişim varsa)
+        if hasCalendarAccess {
+            if let calendarReason = getCalendarHolidayReason(date: normalizedDate) {
+                return "Takvim etkinliği: '\(calendarReason)'"
+            }
+        }
+        
+        // Tatil değilse nil döndür
+        return nil
+    }
+
+    /// Bir günün kullanıcı tanımlı hafta sonu olup olmadığını ve gün adını döndürür.
+    private func getUserDefinedWeekendReason(date: Date) -> String? {
+        let calendar = Calendar.current
+        let weekday = calendar.component(.weekday, from: date) // 1=Pazar, 2=Pazartesi, ..., 7=Cumartesi
+        
+        let dayName: String
+        let isHoliday: Bool
+        
+        switch weekday {
+        case 1: (dayName, isHoliday) = ("Pazar", isSundayHoliday)
+        case 2: (dayName, isHoliday) = ("Pazartesi", isMondayHoliday)
+        case 3: (dayName, isHoliday) = ("Salı", isTuesdayHoliday)
+        case 4: (dayName, isHoliday) = ("Çarşamba", isWednesdayHoliday)
+        case 5: (dayName, isHoliday) = ("Perşembe", isThursdayHoliday)
+        case 6: (dayName, isHoliday) = ("Cuma", isFridayHoliday)
+        case 7: (dayName, isHoliday) = ("Cumartesi", isSaturdayHoliday)
+        default: return nil
+        }
+        
+        return isHoliday ? dayName : nil
+    }
+    
+    /// Bir günün takvim etkinliği nedeniyle tatil olup olmadığını ve etkinlik başlığını döndürür.
+    private func getCalendarHolidayReason(date: Date) -> String? {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
         guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
-            logger.error("[IS_CALENDAR_HOLIDAY] Gün sonu hesaplanamadı: \(self.debugFormatter.string(from: startOfDay))")
-            return false
+            return nil
         }
         
-        let predicate = eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: nil)
+        // 1. Kullanıcının seçtiği takvimleri al
+        let selectedIDs = Set(loadSelectedCalendarIDs())
+        let calendarsToSearch = getAvailableCalendars().filter { selectedIDs.contains($0.calendarIdentifier) }
+
+        // 2. Eğer kullanıcı hiçbir takvim seçmemişse (veya erişim yoksa) arama yapma
+        guard !calendarsToSearch.isEmpty else {
+            logger.debug("[getCalendarHolidayReason] Aranacak seçili takvim bulunmuyor.")
+            return nil
+        }
+        
+        // 3. Predicate'i `nil` yerine sadece seçili takvimlerle oluştur
+        let predicate = eventStore.predicateForEvents(withStart: startOfDay, end: endOfDay, calendars: calendarsToSearch)
         let events = eventStore.events(matching: predicate)
         
-        logger.debug("[IS_CALENDAR_HOLIDAY] \(self.debugFormatter.string(from: startOfDay)) için \(events.count) etkinlik bulundu.")
-
         for event in events {
             if event.isAllDay {
-                let title = event.title?.lowercased() ?? ""
-                logger.debug("[IS_CALENDAR_HOLIDAY] Tam gün etkinlik başlığı: '\(title)'")
+                let title = event.title ?? ""
                 if isHolidayKeyword(in: title) {
-                    logger.debug("[IS_CALENDAR_HOLIDAY] Tatil anahtar kelimesi bulundu: '\(title)'")
-                    return true
+                    // Tatil sebebi olarak etkinliğin başlığını döndür
+                    return title
                 }
             }
         }
-        return false
+        return nil
     }
     
     private func isHolidayKeyword(in title: String) -> Bool {
@@ -149,41 +196,6 @@ class HolidayService: ObservableObject {
         return false
     }
     
-    private func isBasicTurkishHoliday(date: Date) -> Bool {
-        let calendar = Calendar.current
-        let components = calendar.dateComponents([.month, .day, .year], from: calendar.startOfDay(for: date))
-        
-        guard let month = components.month, let day = components.day, let year = components.year else {
-            logger.error("[IS_BASIC_TURKISH_HOLIDAY] Ay/gün/yıl bileşenleri alınamadı: \(self.debugFormatter.string(from: date))")
-            return false
-        }
-        
-        // Bu bölümün her yıl güncellenmesi veya dinamik bir servise bağlanması gerekmektedir.
-        let dynamicHolidays: [(month: Int, day: Int, year: Int)] = [
-            // 2024
-            (4,10,2024), (4,11,2024), (4,12,2024),
-            (6,15,2024), (6,16,2024), (6,17,2024), (6,18,2024), (6,19,2024),
-            // 2025
-            (3,30,2025), (3,31,2025), (4,1,2025),
-            (6,5,2025), (6,6,2025), (6,7,2025), (6,8,2025), (6,9,2025)
-        ]
-        
-        if dynamicHolidays.contains(where: { $0.year == year && $0.month == month && $0.day == day }) {
-            logger.debug("[IS_BASIC_TURKISH_HOLIDAY] Dinamik tatil (Örnek \(year)): Ay \(month), Gün \(day)")
-            return true
-        }
-
-        let fixedHolidays: [(month: Int, day: Int)] = [
-            (1, 1), (4, 23), (5, 1), (5, 19), (7, 15), (8, 30), (10, 29)
-        ]
-        
-        if fixedHolidays.contains(where: { $0.month == month && $0.day == day }) {
-            logger.debug("[IS_BASIC_TURKISH_HOLIDAY] Sabit tatil: Ay \(month), Gün \(day)")
-            return true
-        }
-        return false
-    }
-    
     func findNextWorkingDay(from date: Date) -> Date {
         let calendar = Calendar.current
         var nextDay = calendar.startOfDay(for: date)
@@ -192,8 +204,9 @@ class HolidayService: ObservableObject {
         var daysChecked = 0
         let maxDaysToCheck = 30
 
-        while isHoliday(date: nextDay) && daysChecked < maxDaysToCheck {
-            logger.debug("[FIND_NEXT_WORKING_DAY] Kontrol: \(self.debugFormatter.string(from: nextDay)) bir tatil. Sonraki güne geçiliyor.")
+        while let reason = getHolidayReason(for: nextDay), daysChecked < maxDaysToCheck {
+            logger.debug("[FIND_NEXT_WORKING_DAY] Tarih kaydırıldı: \(self.debugFormatter.string(from: nextDay)). Sebep: \(reason)")
+            
             guard let newCalculatedDay = calendar.date(byAdding: .day, value: 1, to: nextDay) else {
                 logger.critical("[FIND_NEXT_WORKING_DAY] KRİTİK HATA: Sonraki güne ekleme yapılamadı! Mevcut gün: \(self.debugFormatter.string(from: nextDay)). Mevcut günü döndürüyorum.")
                 return nextDay
@@ -214,6 +227,10 @@ class HolidayService: ObservableObject {
         Task {
             _ = await requestCalendarAccess()
             logger.info("[REFRESH] HolidayService yenilendi, takvim erişimi: \(self.hasCalendarAccess)")
+            
+            await MainActor.run {
+                self.objectWillChange.send()
+            }
         }
     }
 }

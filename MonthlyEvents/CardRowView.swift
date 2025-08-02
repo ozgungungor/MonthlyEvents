@@ -3,7 +3,13 @@ import os.log
 
 struct CardRowView: View {
     let card: CreditCard
-    let holidayService: HolidayService
+    
+    // --- BURASI GÜNCELLENDİ ---
+    // 'let' yerine '@ObservedObject' kullanılarak, bu görünümün
+    // HolidayService'deki değişiklikleri dinlemesi ve kendini otomatik
+    // olarak güncellemesi sağlanır.
+    @ObservedObject var holidayService: HolidayService
+    
     @Environment(\.locale) var currentLocale
 
     // MARK: - Properties
@@ -20,9 +26,9 @@ struct CardRowView: View {
     // MARK: - Body
     var body: some View {
         HStack(spacing: 15) {
-            cardIconView // BURASI GÜNCELLENDİ
-                .frame(width: 45, height: 33) // Sabit boyut
-                .clipped() // İçerik çerçeve dışına taşarsa kes
+            cardIconView
+                .frame(width: 45, height: 33)
+                .clipped()
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(card.name)
@@ -74,25 +80,25 @@ struct CardRowView: View {
     
     @ViewBuilder
     private var cardIconView: some View {
-        ZStack(alignment: .bottomTrailing) { // Numara için sağ alt hizalama
+        ZStack(alignment: .bottomTrailing) {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .fill(cardColor)
-                .frame(width: 45, height: 33) // Dikdörtgenin sabit boyutu
+                .frame(width: 45, height: 33)
 
             Image(systemName: card.type.systemIconName)
                 .resizable()
                 .scaledToFit()
-                .frame(width: 20, height: 20) // İkonun boyutu
-                .foregroundColor(textColorOnCard) // Arka plan rengine göre otomatik renk
-                .padding(.leading, 5) // Sol kenardan padding
-                .offset(x: 0, y: -5) // İkonu sola doğru daha fazla kaydır
-                .frame(maxWidth: .infinity, alignment: .leading) // Sol tarafa hizala
+                .frame(width: 20, height: 20)
+                .foregroundColor(textColorOnCard)
+                .padding(.leading, 5)
+                .offset(x: 0, y: -5)
+                .frame(maxWidth: .infinity, alignment: .leading)
 
             if card.type == .card || card.type == .loan || card.type == .oneTimePayment || card.type == .subscription {
                 Text("\(card.dueDate)")
                     .font(.system(size: 11, weight: .bold))
                     .foregroundColor(textColorOnCard)
-                    .padding([.bottom, .trailing], 4) // Sağ alt köşede tutarlı padding
+                    .padding([.bottom, .trailing], 4)
             }
         }
     }
