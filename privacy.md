@@ -1,3 +1,8 @@
+Privacy Policy
+Last Updated: August 14, 2025
+
+This Privacy Policy explains the information collected from users of the Paynify (“Application”), developed by Ozgun Gungor (“we,” “us,” or “our”), and how this information is used.
+
 1. Information We Collect
 
 When you use our Application, there are two types of information involved:
