@@ -1,5 +1,5 @@
 Gizlilik Politikası
-Son Güncelleme: 18 Temmuz 2025
+Son Güncelleme: 13 Ağustos 2025
 
 Bu Gizlilik Politikası, Ozgun Gungor (“biz”, “bize” veya “bizim”) tarafından geliştirilen Paynify (“Uygulama”) mobil uygulamasının kullanıcılarından hangi bilgilerin toplandığını ve bu bilgilerin nasıl kullanıldığını açıklar.
 
